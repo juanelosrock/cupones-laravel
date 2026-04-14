@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -r ':*)",
+      "Bash(curl -s --max-time 5 https://api.zenvia.com/v2/channels/sms/messages -o /dev/null -w \"%{http_code}\")",
+      "Read(//c/Users/QimeraServer/Downloads/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/admin/customers)",
+      "Bash(php artisan:*)",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt -d '_token=__CMDSUB_OUTPUT__&email=admin@cuponeshub.com&password=Admin@2026!' -X POST http://localhost:8001/login -o /dev/null -w '%{http_code}')",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt http://localhost:8001/admin/customers/create -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt http://localhost:8001/admin/customers/import -o /dev/null -w \"%{http_code}\")",
+      "Bash(python3 -c ':*)",
+      "Bash(grep -n \"full_name\\\\|acceptance_ip\\\\|created_via\\\\|data_treatment\" e:/cupones-laravel/database/migrations/*.php)",
+      "Bash(grep -n \"request_body\\\\|request_hash\\\\|ip_address\\\\|processing_ms\" e:/cupones-laravel/database/migrations/*api_request*)",
+      "Bash(grep -n \"TrustProxies\\\\|trustProxies\\\\|proxies\" e:/cupones-laravel/bootstrap/app.php e:/cupones-laravel/app/Http/Middleware/*.php)",
+      "Bash(php -l app/Http/Controllers/Admin/CampaignController.php)",
+      "Bash(php -l app/Imports/CampaignCustomersImport.php)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -b \"laravel_session=test\" http://localhost:8001/admin/campaigns/3/assign)",
+      "Bash(curl -s http://localhost:8001/login)",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt -X POST http://localhost:8001/login -d _token=__CMDSUB_OUTPUT__)",
+      "Bash(curl -s -c /tmp/ch_cookies.txt http://localhost:8001/login)",
+      "Bash(curl -s -c /tmp/ch_cookies.txt -b /tmp/ch_cookies.txt -X POST http://localhost:8001/login -d '_token=1Xwn9fzQoda8h7C4hZfdhl7YEDTkkoZA8lxLmZHl&email=admin%40cuponeshub.com&password=Admin%402026%21' -H 'Content-Type: application/x-www-form-urlencoded' -L -w '\\\\nFinal URL: %{url_effective}\\\\nHTTP: %{http_code}' -o /tmp/login_result.txt)",
+      "Read(//tmp/**)",
+      "Bash(grep -o \"w-6\\\\|h-6\\\\|w-10\\\\|h-10\\\\|w-8\\\\|h-8\" e:/cupones-laravel/public/build/assets/*.css)",
+      "Bash(grep -o \"\\\\.h-6[^a-z0-9_-][^}]*}\" e:/cupones-laravel/public/build/assets/*.css)",
+      "Bash(grep -o \"\\\\.w-6[^a-z0-9_-][^}]*}\" e:/cupones-laravel/public/build/assets/*.css)",
+      "Bash(ls -la e:/cupones-laravel/public/build/assets/*.css)",
+      "Bash(head -c 500 e:/cupones-laravel/public/build/assets/*.css)",
+      "Bash(grep -E \"w-6|h-6\" e:/cupones-laravel/public/build/assets/*.css)",
+      "Bash(grep \"use App\\\\\\\\\\\\Models\\\\\\\\\\\\Department\" e:/cupones-laravel/app/Http/Controllers/Admin/CustomerController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/CustomerController.php)",
+      "Bash(php -l resources/views/admin/manual/index.blade.php)",
+      "Bash(php -r 'require '\\\\''vendor/autoload.php'\\\\''; $app = require '\\\\''bootstrap/app.php'\\\\''; echo '\\\\''OK'\\\\'';')",
+      "Bash(gh auth:*)",
+      "Bash(git config:*)"
+    ]
+  }
+}
