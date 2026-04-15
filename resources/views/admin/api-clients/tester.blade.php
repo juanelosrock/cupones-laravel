@@ -7,6 +7,7 @@
 .endpoint-item { transition: background .12s; }
 .endpoint-item.active { background: rgba(255,255,255,.1); }
 .endpoint-item:hover:not(.active) { background: rgba(255,255,255,.05); }
+[x-cloak] { display: none !important; }
 </style>
 @endpush
 
@@ -106,6 +107,14 @@
                             <span class="text-xs font-bold font-mono px-2.5 py-1.5 rounded-lg flex-shrink-0"
                                   :class="methodBadge(selectedEndpoint.method)" x-text="selectedEndpoint.method"></span>
                             <div class="flex-1 font-mono text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-700 overflow-x-auto whitespace-nowrap" x-text="buildUrl()"></div>
+                            {{-- Export button --}}
+                            <button @click="openExport()" type="button"
+                                    class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-gray-50">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                </svg>
+                                <span class="text-gray-600">Exportar</span>
+                            </button>
                             <button @click="send()" :disabled="loading"
                                     class="flex-shrink-0 flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-lg transition-colors">
                                 <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,6 +286,85 @@
             </template>
         </div>
     </div>
+
+    {{-- ── Export Modal ── --}}
+    <div x-show="exportModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="background:rgba(0,0,0,.6);"
+         @keydown.escape.window="exportModal=false">
+
+        <div @click.outside="exportModal=false"
+             class="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+             style="background:#161b22; border:1px solid #30363d; max-height:80vh;">
+
+            {{-- Modal header --}}
+            <div class="flex items-center justify-between px-5 py-4 flex-shrink-0" style="border-bottom:1px solid #30363d;">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4" style="color:#58a6ff;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                    <span class="text-sm font-semibold" style="color:#e6edf3;">Exportar petición</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-mono"
+                          :class="methodBadge(selectedEndpoint?.method)"
+                          x-text="selectedEndpoint?.method + ' ' + selectedEndpoint?.shortPath"></span>
+                </div>
+                <button @click="exportModal=false" type="button"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
+                        style="color:#8b949e;" onmouseover="this.style.background='#21262d'" onmouseout="this.style.background='transparent'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Tabs --}}
+            <div class="flex gap-1 px-5 pt-3 flex-shrink-0" style="border-bottom:1px solid #30363d; padding-bottom:0;">
+                <button @click="exportTab='curl'"
+                        class="text-xs font-mono px-4 py-2 rounded-t-lg transition-colors"
+                        :style="exportTab==='curl'
+                            ? 'background:#0d1117; color:#58a6ff; border:1px solid #30363d; border-bottom:1px solid #0d1117; margin-bottom:-1px;'
+                            : 'color:#8b949e;'">
+                    cURL
+                </button>
+                <button @click="exportTab='php'"
+                        class="text-xs font-mono px-4 py-2 rounded-t-lg transition-colors"
+                        :style="exportTab==='php'
+                            ? 'background:#0d1117; color:#58a6ff; border:1px solid #30363d; border-bottom:1px solid #0d1117; margin-bottom:-1px;'
+                            : 'color:#8b949e;'">
+                    PHP (cURL)
+                </button>
+            </div>
+
+            {{-- Code area --}}
+            <div class="flex-1 overflow-auto relative" style="background:#0d1117;">
+                <pre class="text-xs font-mono p-5 leading-relaxed"
+                     style="color:#e6edf3; tab-size:2;"
+                     x-text="exportTab === 'curl' ? generateCurl() : generatePhp()"></pre>
+            </div>
+
+            {{-- Footer --}}
+            <div class="flex items-center justify-between px-5 py-3 flex-shrink-0" style="background:#161b22; border-top:1px solid #30363d;">
+                <p class="text-xs" style="color:#484f58;">
+                    <span x-show="exportTab==='curl'">Ejecuta en terminal o importa en Postman / Insomnia</span>
+                    <span x-show="exportTab==='php'">Requiere la extensión <code style="color:#79c0ff;">ext-curl</code> (disponible por defecto en PHP)</span>
+                </p>
+                <button @click="copyExport()" type="button"
+                        class="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+                        :style="copiedExport
+                            ? 'background:#238636; color:#fff;'
+                            : 'background:#21262d; color:#c9d1d9; border:1px solid #30363d;'">
+                    <svg x-show="!copiedExport" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    <svg x-show="copiedExport" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span x-text="copiedExport ? '¡Copiado!' : 'Copiar código'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @push('scripts')
@@ -295,6 +383,9 @@ function apiTester() {
         response: null,
         activeTab: 'body',
         copied: false,
+        exportModal: false,
+        exportTab: 'curl',
+        copiedExport: false,
 
         endpointGroups: [
             {
@@ -575,6 +666,145 @@ function apiTester() {
                 500: 'Internal Server Error',
             };
             return map[code] || '';
+        },
+
+        // ── Export ──────────────────────────────────────────────────────────
+
+        openExport() {
+            this.exportModal = true;
+            this.copiedExport = false;
+        },
+
+        _buildHeaders() {
+            const ep = this.selectedEndpoint;
+            const h = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            if (ep.requiresAuth) {
+                if (this.clientId)     h['X-Client-Id']     = this.clientId;
+                if (this.clientSecret) h['X-Client-Secret'] = this.clientSecret;
+            }
+            return h;
+        },
+
+        generateCurl() {
+            if (!this.selectedEndpoint) return '';
+            const ep     = this.selectedEndpoint;
+            const url    = this.buildUrl();
+            const hdrs   = this._buildHeaders();
+            const method = ep.method;
+
+            let lines = [`curl -X ${method} '${url}'`];
+
+            Object.entries(hdrs).forEach(([k, v]) => {
+                lines.push(`  -H '${k}: ${v}'`);
+            });
+
+            if (method !== 'GET' && this.body.trim()) {
+                // Format body for readability
+                let bodyStr = this.body.trim();
+                try { bodyStr = JSON.stringify(JSON.parse(bodyStr), null, 2); } catch(e) {}
+                // Escape single quotes
+                bodyStr = bodyStr.replace(/'/g, "'\\''");
+                lines.push(`  -d '${bodyStr}'`);
+            }
+
+            return lines.join(' \\\n');
+        },
+
+        generatePhp() {
+            if (!this.selectedEndpoint) return '';
+            const ep   = this.selectedEndpoint;
+            const url  = this.buildUrl();
+            const hdrs = this._buildHeaders();
+
+            const hdrArray = Object.entries(hdrs)
+                .map(([k, v]) => `    '${k}: ${v}',`)
+                .join('\n');
+
+            let bodySection = '';
+            if (ep.method !== 'GET' && this.body.trim()) {
+                let parsed;
+                try {
+                    parsed = JSON.parse(this.body);
+                } catch(e) { parsed = null; }
+
+                if (parsed !== null) {
+                    bodySection = this._phpArray(parsed, 1);
+                    bodySection = `\n    CURLOPT_POSTFIELDS => json_encode(${bodySection}),`;
+                } else {
+                    const escaped = this.body.trim().replace(/'/g, "\\'");
+                    bodySection = `\n    CURLOPT_POSTFIELDS => '${escaped}',`;
+                }
+            }
+
+            return `<?php
+
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL            => '${url}',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CUSTOMREQUEST  => '${ep.method}',
+    CURLOPT_HTTPHEADER     => [
+${hdrArray}
+    ],${bodySection}
+]);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($response === false) {
+    throw new \\RuntimeException('cURL error: ' . curl_error($ch));
+}
+
+$data = json_decode($response, true);
+
+// Ejemplo de uso:
+// if ($httpCode === 200 && $data['valid'] ?? false) { ... }`;
+        },
+
+        _phpArray(obj, depth) {
+            const indent  = '    '.repeat(depth);
+            const indent1 = '    '.repeat(depth + 1);
+
+            if (Array.isArray(obj)) {
+                if (obj.length === 0) return '[]';
+                const items = obj.map(v => `${indent1}${this._phpValue(v, depth + 1)},`).join('\n');
+                return `[\n${items}\n${indent}]`;
+            }
+
+            if (obj !== null && typeof obj === 'object') {
+                const entries = Object.entries(obj);
+                if (entries.length === 0) return '[]';
+                const items = entries.map(([k, v]) =>
+                    `${indent1}'${k}' => ${this._phpValue(v, depth + 1)},`
+                ).join('\n');
+                return `[\n${items}\n${indent}]`;
+            }
+
+            return this._phpValue(obj, depth);
+        },
+
+        _phpValue(v, depth) {
+            if (v === null)             return 'null';
+            if (v === true)             return 'true';
+            if (v === false)            return 'false';
+            if (typeof v === 'number')  return String(v);
+            if (typeof v === 'string')  return `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+            if (typeof v === 'object')  return this._phpArray(v, depth);
+            return `'${v}'`;
+        },
+
+        async copyExport() {
+            const code = this.exportTab === 'curl' ? this.generateCurl() : this.generatePhp();
+            try {
+                await navigator.clipboard.writeText(code);
+                this.copiedExport = true;
+                setTimeout(() => this.copiedExport = false, 2500);
+            } catch(e) {}
         },
     };
 }
