@@ -56,7 +56,7 @@ class CouponController extends Controller
             'phone'           => 'nullable|string|max:20',
             'document_number' => 'nullable|string|max:30',
             'point_of_sale_id'=> 'nullable|integer|exists:points_of_sale,id',
-            'channel'         => 'nullable|in:pos,app,web,api',
+            'channel'         => 'nullable|in:api,web,manual,sms,pos,app',
             'order_id'        => 'nullable|string|max:100',
         ]);
 
