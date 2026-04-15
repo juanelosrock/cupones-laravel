@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Panel') — CuponesHub</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="{ sidebarOpen: false }">
 
@@ -114,5 +115,6 @@
         @yield('content')
     </main>
 </div>
+@stack('scripts')
 </body>
 </html>

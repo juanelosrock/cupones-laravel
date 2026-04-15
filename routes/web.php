@@ -102,6 +102,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('api-clients/create',                        [Admin\ApiClientController::class, 'create'])->name('api-clients.create');
     Route::post('api-clients',                              [Admin\ApiClientController::class, 'store'])->name('api-clients.store');
     Route::get('api-clients/docs',                          [Admin\ApiClientController::class, 'docs'])->name('api-clients.docs');
+    Route::get('api-clients/tester',                        [Admin\ApiClientController::class, 'tester'])->name('api-clients.tester');
     Route::get('api-clients/{apiClient}',                   [Admin\ApiClientController::class, 'show'])->name('api-clients.show');
     Route::get('api-clients/{apiClient}/edit',              [Admin\ApiClientController::class, 'edit'])->name('api-clients.edit');
     Route::put('api-clients/{apiClient}',                   [Admin\ApiClientController::class, 'update'])->name('api-clients.update');

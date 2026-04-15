@@ -215,6 +215,13 @@ class ApiClientController extends Controller
         return view('admin.api-clients.docs', compact('baseUrl'));
     }
 
+    public function tester()
+    {
+        $baseUrl    = rtrim(config('app.url'), '/') . '/api/v1';
+        $apiClients = ApiClient::where('status', 'active')->orderBy('name')->get(['id', 'name', 'client_id']);
+        return view('admin.api-clients.tester', compact('baseUrl', 'apiClients'));
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private function parseIpList(string $raw): array

@@ -34,6 +34,7 @@
                 <a href="#geografia"       class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Geografía</a>
                 <a href="#legales"         class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Documentos Legales</a>
                 <a href="#api-clients"     class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">API Clients</a>
+                <a href="#api-tester"     class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">API Tester</a>
                 <a href="#auditoria"       class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Auditoría</a>
             </nav>
         </div>
@@ -752,6 +753,47 @@
                 La respuesta incluye los campos <code class="bg-gray-100 px-1 rounded">city</code> y <code class="bg-gray-100 px-1 rounded">department</code> con el nombre resuelto.
                 Ver documentación completa en <strong>API Clients → Ver Documentación</strong>.
             </p>
+        </div>
+
+        {{-- ── API TESTER ── --}}
+        <div class="bg-white rounded-xl shadow-sm p-6" id="api-tester">
+            <h2 class="text-xl font-bold text-gray-900 mb-1">API Tester</h2>
+            <p class="text-sm text-gray-500 mb-4">Herramienta integrada para probar los endpoints del API sin salir del panel</p>
+
+            <p class="text-sm text-gray-600 mb-4">
+                El <strong>API Tester</strong> es una herramienta tipo Postman integrada directamente en el panel.
+                Permite enviar peticiones reales a todos los endpoints del API, ver la respuesta formateada y
+                verificar que las credenciales de un cliente funcionen correctamente.
+            </p>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Cómo acceder</h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Desde <strong>API Clients</strong> haz clic en el botón <strong>"API Tester"</strong> en la esquina superior derecha,
+                o desde la <strong>Documentación API</strong> donde también aparece el mismo botón.
+            </p>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Cómo usarlo</h3>
+            <ol class="text-sm text-gray-600 space-y-1.5 list-decimal list-inside mb-4">
+                <li>En el panel izquierdo, selecciona el cliente API del dropdown o escribe el <code class="bg-gray-100 px-1 rounded text-xs">Client ID</code> y <code class="bg-gray-100 px-1 rounded text-xs">Client Secret</code> manualmente.</li>
+                <li>Haz clic en el endpoint que quieres probar (agrupados por Cupones, Clientes, Legal, Sistema).</li>
+                <li>Modifica el <strong>Body (JSON)</strong> con los datos de prueba que necesitas.</li>
+                <li>Si el endpoint requiere un parámetro de ruta (como <code class="bg-gray-100 px-1 rounded text-xs">{code}</code>), edítalo en la pestaña <strong>Path params</strong>.</li>
+                <li>Haz clic en <strong>Enviar</strong> — verás la respuesta JSON debajo con el código HTTP y el tiempo de respuesta.</li>
+            </ol>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Notas importantes</h3>
+            <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside mb-4">
+                <li>Las peticiones se envían <strong>directamente desde tu navegador</strong> hacia el API — no pasan por el servidor del panel.</li>
+                <li>Las credenciales se guardan temporalmente en el almacenamiento local del navegador para mayor comodidad.</li>
+                <li>El endpoint <strong>POST /coupons/redeem</strong> <span class="text-red-600 font-medium">consume el cupón</span> — úsalo con cuidado en producción.</li>
+                <li>Los endpoints de <strong>Legal</strong> y <strong>Health</strong> son públicos y no requieren credenciales.</li>
+            </ul>
+
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+                <strong>Tip:</strong> Usa el API Tester con las credenciales del cliente "Demo" para hacer pruebas
+                sin afectar clientes de producción. El secret del cliente demo lo encuentras en la sección
+                de <strong>API Clients</strong> → demo → ver detalle.
+            </div>
         </div>
 
         {{-- ── AUDITORÍA ── --}}
