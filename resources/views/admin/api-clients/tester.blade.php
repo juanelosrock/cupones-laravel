@@ -739,7 +739,9 @@ function apiTester() {
                 }
             }
 
-            return `<?php
+            // '<?'+'php' — split to prevent Blade from parsing it as PHP
+            const openTag = '<' + '?php';
+            return openTag + `
 
 $ch = curl_init();
 
@@ -757,7 +759,7 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($response === false) {
-    throw new \\RuntimeException('cURL error: ' . curl_error($ch));
+    throw new RuntimeException('cURL error: ' . curl_error($ch));
 }
 
 $data = json_decode($response, true);
