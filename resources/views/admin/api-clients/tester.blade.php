@@ -163,12 +163,14 @@
 
                         {{-- Tab: Body --}}
                         <div x-show="activeTab==='body' && selectedEndpoint.method !== 'GET'">
-                            <div class="relative">
+                            <div class="relative rounded-xl overflow-hidden" style="background:#0d1117">
                                 <textarea x-model="body" rows="8" spellcheck="false"
-                                          class="w-full text-xs font-mono bg-gray-950 text-gray-100 rounded-lg p-4 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+                                          class="w-full text-xs font-mono rounded-xl p-4 focus:outline-none resize-y border-0"
+                                          style="background:#0d1117; color:#e6edf3; caret-color:#58a6ff; outline:none;"
                                           placeholder="{ }"></textarea>
                                 <button @click="formatBody()" type="button"
-                                        class="absolute top-2 right-2 text-[10px] bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition-colors">
+                                        class="absolute top-2 right-2 text-[10px] px-2 py-1 rounded transition-colors"
+                                        style="background:#21262d; color:#8b949e; border:1px solid #30363d;">
                                     Formatear
                                 </button>
                             </div>
@@ -212,12 +214,17 @@
                     </div>
 
                     {{-- Response panel --}}
-                    <div class="bg-white rounded-xl shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
+                    <div class="rounded-xl shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden" style="background:#0d1117; border:1px solid #30363d;">
+
+                        {{-- Label --}}
+                        <div class="flex items-center justify-between px-4 py-2 flex-shrink-0" style="background:#161b22; border-bottom:1px solid #30363d;">
+                            <span class="text-xs font-semibold uppercase tracking-wider" style="color:#8b949e;">Respuesta</span>
+                        </div>
 
                         {{-- Response empty state --}}
-                        <div x-show="!response && !loading" class="flex-1 flex items-center justify-center text-gray-300">
-                            <div class="text-center">
-                                <svg class="w-8 h-8 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div x-show="!response && !loading" class="flex-1 flex items-center justify-center">
+                            <div class="text-center" style="color:#484f58;">
+                                <svg class="w-8 h-8 mx-auto mb-2" style="opacity:.4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                 </svg>
                                 <p class="text-sm">La respuesta aparecerá aquí</p>
@@ -226,12 +233,12 @@
 
                         {{-- Loading state --}}
                         <div x-show="loading" class="flex-1 flex items-center justify-center">
-                            <div class="text-center text-gray-400">
-                                <svg class="w-8 h-8 mx-auto mb-2 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                            <div class="text-center" style="color:#8b949e;">
+                                <svg class="w-8 h-8 mx-auto mb-2 animate-spin" style="color:#58a6ff;" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 12 0 12 12z"></path>
                                 </svg>
-                                <p class="text-sm">Enviando petición…</p>
+                                <p class="text-sm mt-2">Enviando petición…</p>
                             </div>
                         </div>
 
@@ -239,16 +246,17 @@
                         <template x-if="response && !loading">
                             <div class="flex flex-col flex-1 min-h-0">
                                 {{-- Status bar --}}
-                                <div class="flex items-center gap-4 px-4 py-3 border-b border-gray-100 flex-shrink-0">
+                                <div class="flex items-center gap-4 px-4 py-2.5 flex-shrink-0" style="background:#161b22; border-bottom:1px solid #30363d;">
                                     <span class="text-xs font-bold px-2.5 py-1 rounded-full font-mono"
                                           :class="statusBadge(response.status)"
                                           x-text="response.status + ' ' + response.statusText"></span>
-                                    <span class="text-xs text-gray-400">
-                                        <span class="font-semibold text-gray-600" x-text="response.time + ' ms'"></span> tiempo de respuesta
+                                    <span class="text-xs" style="color:#8b949e;">
+                                        <span class="font-semibold" style="color:#e6edf3;" x-text="response.time + ' ms'"></span> tiempo de respuesta
                                     </span>
                                     <div class="ml-auto flex gap-2">
                                         <button @click="copyResponse()" type="button"
-                                                class="text-xs text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                                                class="text-xs flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors"
+                                                style="background:#21262d; color:#8b949e; border:1px solid #30363d;">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                             </svg>
@@ -257,8 +265,8 @@
                                     </div>
                                 </div>
                                 {{-- Body --}}
-                                <div class="flex-1 overflow-auto bg-gray-950 tester-response">
-                                    <pre class="text-xs font-mono text-gray-200 p-4 leading-relaxed"
+                                <div class="flex-1 overflow-auto tester-response">
+                                    <pre class="text-xs font-mono p-4 leading-relaxed" style="color:#e6edf3;"
                                          x-text="response.body"></pre>
                                 </div>
                             </div>
