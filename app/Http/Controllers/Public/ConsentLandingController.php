@@ -20,7 +20,11 @@ class ConsentLandingController extends Controller
             ->latest()
             ->first();
 
-        return view('public.consent-landing', compact('recipient', 'legalDoc'));
+        return view('public.consent-landing', [
+            'recipient' => $recipient,
+            'legalDoc'  => $legalDoc,
+            'accepted'  => false,
+        ]);
     }
 
     public function accept(Request $request, string $token)
