@@ -160,18 +160,21 @@
      TEMPLATE: HERO
      ===================================================================== --}}
 @elseif($landingConfig->template === 'hero')
-<div class="min-h-screen flex flex-col items-center justify-start pt-16 pb-12 px-4 relative"
-     style="background: {{ $landingConfig->bg_color }};">
+@php
+    $previewHeroBg = $landingConfig->hero_image_url
+        ? "background-image:url('" . e($landingConfig->hero_image_url) . "');background-size:cover;background-position:center;background-repeat:no-repeat;"
+        : "background:linear-gradient(135deg,{$landingConfig->brand_color} 0%,#0f172a 100%);";
+@endphp
+<div class="min-h-screen flex flex-col items-center justify-start pt-16 pb-12 px-4"
+     style="position:relative;overflow:hidden;{{ $previewHeroBg }}">
 
-    {{-- Background image --}}
+    {{-- Dark overlay --}}
     @if($landingConfig->hero_image_url)
-    <div class="fixed inset-0 -z-10">
-        <img src="{{ $landingConfig->hero_image_url }}" class="w-full h-full object-cover" alt="">
-        <div class="absolute inset-0 bg-black/50"></div>
-    </div>
-    @else
-    <div class="fixed inset-0 -z-10" style="background: linear-gradient(135deg, {{ $landingConfig->brand_color }} 0%, #0f172a 100%)"></div>
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.50);z-index:0;"></div>
     @endif
+
+    {{-- Wrapper sobre el overlay --}}
+    <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;">
 
     {{-- Logo --}}
     <div class="w-full max-w-md mb-6 text-center">
@@ -224,6 +227,8 @@
     </div>
 
     @include('admin.landing-configs._preview_footer', ['config' => $landingConfig, 'dark' => true])
+
+    </div>{{-- /z-index wrapper --}}
 </div>
 @endif
 
