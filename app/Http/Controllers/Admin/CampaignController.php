@@ -14,6 +14,8 @@ use App\Models\Customer;
 use App\Models\Department;
 use App\Models\PointOfSale;
 use App\Models\Zone;
+use App\Models\SmsCampaign;
+use App\Models\SmsRecipient;
 use App\Services\AuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -255,16 +257,16 @@ class CampaignController extends Controller
         $already = CampaignCustomer::where('campaign_id', $campaign->id)->pluck('customer_id');
         $query->whereNotIn('customers.id', $already);
 
-        $customers = $query->pluck('customers.id');
+        $customers = $query->select('customers.id', 'customers.phone')->get();
 
         if ($customers->isEmpty()) {
             return back()->with('error', 'No hay clientes que cumplan los filtros seleccionados.');
         }
 
         $batch = (string) Str::uuid();
-        $rows  = $customers->map(fn($id) => [
+        $rows  = $customers->map(fn($c) => [
             'campaign_id'  => $campaign->id,
-            'customer_id'  => $id,
+            'customer_id'  => $c->id,
             'source'       => 'filter',
             'import_batch' => $batch,
             'created_at'   => now(),
@@ -272,14 +274,22 @@ class CampaignController extends Controller
 
         CampaignCustomer::insert($rows);
 
+        $smsAdded = $this->syncSmsRecipients($campaign, $customers->pluck('phone', 'id'));
+
         AuditService::log('customers_assigned', Campaign::class, $campaign->id, [], [
-            'assigned' => count($rows),
-            'filters'  => $data,
-            'batch'    => $batch,
+            'assigned'   => count($rows),
+            'sms_synced' => $smsAdded,
+            'filters'    => $data,
+            'batch'      => $batch,
         ]);
 
+        $msg = count($rows) . ' clientes asignados a la campaña.';
+        if ($smsAdded > 0) {
+            $msg .= " {$smsAdded} añadidos también a la campaña SMS asociada.";
+        }
+
         return redirect()->route('admin.campaigns.customers', $campaign)
-            ->with('success', count($rows) . ' clientes asignados a la campaña.');
+            ->with('success', $msg);
     }
 
     public function assignPreview(Request $request, Campaign $campaign): JsonResponse
@@ -362,11 +372,28 @@ class CampaignController extends Controller
             $msg .= " {$importer->skippedAuthorized} excluidos por tener autorización de datos ya registrada.";
         }
 
+        // Sincronizar nuevos clientes con campañas SMS asociadas
+        $smsAdded = 0;
+        if ($importer->imported > 0) {
+            $newCustomers = CampaignCustomer::where('campaign_id', $campaign->id)
+                ->where('import_batch', $importer->getImportBatch())
+                ->join('customers', 'customers.id', '=', 'campaign_customers.customer_id')
+                ->select('customers.id', 'customers.phone')
+                ->get();
+
+            $smsAdded = $this->syncSmsRecipients($campaign, $newCustomers->pluck('phone', 'id'));
+        }
+
+        if ($smsAdded > 0) {
+            $msg .= " {$smsAdded} añadidos también a la campaña SMS asociada.";
+        }
+
         AuditService::log('customers_imported', Campaign::class, $campaign->id, [], [
-            'imported' => $importer->imported,
-            'updated'  => $importer->updated,
-            'skipped'  => $importer->skipped,
-            'batch'    => $importer->getImportBatch(),
+            'imported'   => $importer->imported,
+            'updated'    => $importer->updated,
+            'skipped'    => $importer->skipped,
+            'sms_synced' => $smsAdded,
+            'batch'      => $importer->getImportBatch(),
         ]);
 
         return redirect()
@@ -395,6 +422,56 @@ class CampaignController extends Controller
     {
         $campaign->customers()->detach($customerId);
         return back()->with('success', 'Cliente eliminado de la campaña.');
+    }
+
+    /**
+     * Crea SmsRecipient para cada cliente nuevo en las campañas SMS activas vinculadas.
+     * Recibe un mapa [customer_id => phone].
+     */
+    private function syncSmsRecipients(Campaign $campaign, \Illuminate\Support\Collection $phoneById): int
+    {
+        if ($phoneById->isEmpty()) return 0;
+
+        $smsCampaigns = SmsCampaign::where('campaign_id', $campaign->id)
+            ->whereNotIn('status', ['sent', 'finished', 'cancelled'])
+            ->get();
+
+        if ($smsCampaigns->isEmpty()) return 0;
+
+        $customerIds = $phoneById->keys();
+        $totalAdded  = 0;
+
+        foreach ($smsCampaigns as $smsCampaign) {
+            $existing = SmsRecipient::where('sms_campaign_id', $smsCampaign->id)
+                ->whereIn('customer_id', $customerIds)
+                ->pluck('customer_id');
+
+            $newIds = $customerIds->diff($existing);
+            if ($newIds->isEmpty()) continue;
+
+            $rows = [];
+            foreach ($newIds as $customerId) {
+                $phone = $phoneById[$customerId] ?? null;
+                if (!$phone) continue;
+
+                $rows[] = [
+                    'sms_campaign_id' => $smsCampaign->id,
+                    'customer_id'     => $customerId,
+                    'phone'           => $phone,
+                    'consent_token'   => $smsCampaign->send_consent_link ? (string) Str::uuid() : null,
+                    'status'          => 'pending',
+                    'created_at'      => now(),
+                ];
+            }
+
+            if (!empty($rows)) {
+                SmsRecipient::insert($rows);
+                $smsCampaign->increment('total_recipients', count($rows));
+                $totalAdded += count($rows);
+            }
+        }
+
+        return $totalAdded;
     }
 
     /** Sincroniza zonas y PDVs seleccionados en el formulario. */
