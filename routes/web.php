@@ -97,6 +97,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('sms-campaigns/{smsCampaign}/retry',  [Admin\SmsCampaignController::class, 'retry'])->name('sms-campaigns.retry');
     Route::post('sms-campaigns/{smsCampaign}/recipients/{recipient}/retry', [Admin\SmsCampaignController::class, 'retryRecipient'])->name('sms-campaigns.recipients.retry');
     Route::post('sms-campaigns/{smsCampaign}/sync-recipients',             [Admin\SmsCampaignController::class, 'syncRecipients'])->name('sms-campaigns.sync-recipients');
+    Route::post('sms-campaigns/{smsCampaign}/process-pending',            [Admin\SmsCampaignController::class, 'processPending'])->name('sms-campaigns.process-pending');
 
     // API Clients — rutas fijas ANTES de {apiClient}
     Route::get('api-clients',                               [Admin\ApiClientController::class, 'index'])->name('api-clients.index');

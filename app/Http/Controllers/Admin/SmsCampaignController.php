@@ -215,6 +215,24 @@ class SmsCampaignController extends Controller
         return back()->with('success', $msg);
     }
 
+    public function processPending(SmsCampaign $smsCampaign)
+    {
+        $pendingCount = $smsCampaign->recipients()->where('status', 'pending')->count();
+
+        if ($pendingCount === 0) {
+            return back()->with('error', 'No hay destinatarios pendientes de envío.');
+        }
+
+        ProcessSmsCampaign::dispatch($smsCampaign);
+        $smsCampaign->update(['status' => 'sending', 'finished_at' => null]);
+
+        AuditService::log('process_pending_dispatched', SmsCampaign::class, $smsCampaign->id, [], [
+            'pending' => $pendingCount,
+        ]);
+
+        return back()->with('success', "{$pendingCount} destinatario(s) pendiente(s) despachados a la cola de envío.");
+    }
+
     public function send(SmsCampaign $smsCampaign)
     {
         if (!in_array($smsCampaign->status, ['draft', 'scheduled', 'failed'])) {
