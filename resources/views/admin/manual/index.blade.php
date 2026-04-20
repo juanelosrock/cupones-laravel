@@ -7,7 +7,7 @@
         <h1 class="text-2xl font-bold text-gray-900">Manual de Usuario</h1>
         <p class="text-sm text-gray-500 mt-0.5">Guía completa para el uso del panel de administración CuponesHub</p>
     </div>
-    <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-medium">v1.1 — Abril 2026</span>
+    <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-medium">v1.2 — Abril 2026</span>
 </div>
 
 <div class="flex gap-6">
@@ -477,20 +477,36 @@
                 con el branding de tu empresa.
             </p>
 
-            <h3 class="text-sm font-semibold text-gray-800 mb-3">3 plantillas disponibles</h3>
-            <div class="grid grid-cols-3 gap-3 mb-5">
-                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100 text-center">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3">4 plantillas disponibles</h3>
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
                     <p class="text-xs font-semibold text-gray-800 mb-1">Minimal</p>
                     <p class="text-xs text-gray-500">Fondo claro con tarjeta blanca centrada. Limpio y profesional.</p>
                 </div>
-                <div class="p-3 bg-blue-50 rounded-lg border border-blue-100 text-center">
+                <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <p class="text-xs font-semibold text-blue-800 mb-1">Branded</p>
                     <p class="text-xs text-blue-700">Encabezado con tu color de marca y logo. Ideal para reconocimiento de marca.</p>
                 </div>
-                <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 text-center">
+                <div class="p-3 bg-gray-800 rounded-lg border border-gray-700">
                     <p class="text-xs font-semibold text-white mb-1">Hero</p>
                     <p class="text-xs text-gray-400">Imagen de fondo a pantalla completa con formulario flotante semitransparente.</p>
                 </div>
+                <div class="p-3 rounded-lg border" style="background:#fff7ed;border-color:#fed7aa;">
+                    <p class="text-xs font-semibold mb-1" style="color:#c2410c;">Promo ⭐ Nuevo</p>
+                    <p class="text-xs" style="color:#9a3412;">Muestra el descuento del cupón en grande (ej: 50% OFF) con formulario de registro de cliente. Capta correo y teléfono, crea o actualiza el cliente automáticamente y registra la aceptación de todos los documentos legales.</p>
+                </div>
+            </div>
+
+            <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg mb-4">
+                <p class="text-xs font-semibold text-orange-800 mb-2">Template Promo — comportamiento especial</p>
+                <ul class="text-xs text-orange-700 space-y-1.5 list-disc list-inside">
+                    <li><strong>El título (heading)</strong> se muestra como el gran badge negro debajo del porcentaje (ej: "DOMICILIOS").</li>
+                    <li><strong>El subtítulo</strong> se usa como encabezado del formulario de registro (ej: "Regístrate").</li>
+                    <li>El cliente ingresa su <strong>teléfono</strong> (obligatorio) y <strong>correo</strong> (opcional).</li>
+                    <li>Si el teléfono ya existe, se actualiza el email. Si no existe, se crea el cliente automáticamente.</li>
+                    <li>Un solo checkbox acepta simultáneamente: tratamiento de datos, T&C, política de privacidad y consentimiento SMS.</li>
+                    <li>Las aceptaciones de los tres documentos legales activos quedan registradas en el historial del cliente.</li>
+                </ul>
             </div>
 
             <h3 class="text-sm font-semibold text-gray-800 mb-2">Qué se puede personalizar</h3>
@@ -513,7 +529,7 @@
             <ol class="text-sm text-gray-600 space-y-1.5 list-decimal list-inside mb-4">
                 <li>Ve a <strong>Landing Pages</strong> → <strong>Nueva landing</strong>.</li>
                 <li>Dale un nombre interno descriptivo (solo visible en el panel).</li>
-                <li>Elige la plantilla: Minimal, Branded o Hero.</li>
+                <li>Elige la plantilla: Minimal, Branded, Hero o <strong>Promo</strong>.</li>
                 <li>Configura los colores y sube el logo (o pega una URL de imagen).</li>
                 <li>Edita los textos con el editor enriquecido.</li>
                 <li>Guarda y usa el botón <strong>Previsualizar</strong> para ver cómo queda.</li>
@@ -889,7 +905,7 @@
                     ['Un cliente dice que no puede redimir su cupón aunque es válido. ¿Qué reviso?',
                      'Verifica: (1) Que el lote esté en estado Activo. (2) Que la fecha actual esté dentro del rango de validez. (3) Que el cliente no esté bloqueado. (4) Que no haya alcanzado el límite de usos por usuario. (5) Que el monto de la compra cumpla con el mínimo requerido.'],
                     ['Subí una imagen de fondo en la landing page pero no se ve en el preview. ¿Qué hago?',
-                     'La imagen de fondo solo aplica al template Hero. Verifica que en la configuración de tu landing page el campo "Plantilla" esté seleccionado como Hero (el tercero, con fondo oscuro). Si usas Minimal o Branded, la imagen de fondo no se muestra. Edita la landing, cambia la plantilla a Hero y guarda.'],
+                     'La imagen de fondo solo aplica al template Hero. Verifica que en la configuración de tu landing page el campo "Plantilla" esté seleccionado como Hero (el tercero, con fondo oscuro). Si usas Minimal, Branded o Promo, la imagen de fondo no se muestra. Edita la landing, cambia la plantilla a Hero y guarda.'],
                     ['El logo de la landing page aparece roto (URL de imagen no encontrada). ¿Cómo lo soluciono?',
                      'Si subiste el logo desde tu computadora, el archivo se guarda en el servidor. Asegúrate de que el servidor tenga el enlace de almacenamiento activo (php artisan storage:link). Si cambiaste de servidor, deberás subir la imagen nuevamente desde el panel de edición de la landing page.'],
                 ];

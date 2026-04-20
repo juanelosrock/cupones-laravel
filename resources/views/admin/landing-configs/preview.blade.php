@@ -230,6 +230,91 @@
 
     </div>{{-- /z-index wrapper --}}
 </div>
+
+{{-- =====================================================================
+     TEMPLATE: PROMO
+     ===================================================================== --}}
+@elseif($landingConfig->template === 'promo')
+@php
+    $prevDiscount = $landingConfig->couponBatch?->discount_type === 'percentage'
+        ? $landingConfig->couponBatch->discount_value . '%'
+        : null;
+    $prevLabel    = $prevDiscount ? 'OFF' : null;
+    // fallback demo values for preview
+    if (!$prevDiscount) { $prevDiscount = '50%'; $prevLabel = 'OFF'; }
+@endphp
+<div class="min-h-screen flex flex-col items-center justify-start py-10 px-4"
+     style="background: {{ $landingConfig->bg_color }}; font-family: system-ui,-apple-system,sans-serif;">
+
+    {{-- Logo --}}
+    <div class="w-full max-w-sm mb-5 text-center">
+        @if($landingConfig->logo_url)
+            <img src="{{ $landingConfig->logo_url }}" class="h-14 mx-auto object-contain" alt="logo">
+        @else
+            <div class="inline-flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                     style="background:{{ $landingConfig->brand_color }}">
+                    <span class="text-white font-bold text-sm">C</span>
+                </div>
+                <span class="font-bold text-gray-800 text-lg">CuponesHub</span>
+            </div>
+        @endif
+    </div>
+
+    {{-- Discount hero --}}
+    <div class="w-full max-w-sm text-center mb-3">
+        <div class="leading-none font-black tracking-tighter"
+             style="font-size:5rem; color:{{ $landingConfig->brand_color }}; text-shadow:2px 2px 0 {{ $landingConfig->brand_color }}33">
+            {{ $prevDiscount }}<span style="font-size:2.5rem">{{ $prevLabel }}</span>
+        </div>
+        @if($landingConfig->heading)
+        <div class="inline-block bg-gray-900 text-white font-extrabold uppercase tracking-widest px-6 py-2 rounded-lg mt-1 text-lg">
+            {{ $landingConfig->heading }}
+        </div>
+        @endif
+    </div>
+
+    {{-- Form card --}}
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        @if($landingConfig->subheading)
+        <p class="text-base font-bold text-gray-800 mb-4">{{ $landingConfig->subheading }}</p>
+        @else
+        <p class="text-base font-bold text-gray-800 mb-4">Regístrate</p>
+        @endif
+
+        @if($landingConfig->body_html)
+        <div class="mb-4 text-sm text-gray-600 ql-content">{!! $landingConfig->body_html !!}</div>
+        @endif
+
+        <div class="space-y-3 mb-4">
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">E-Mail</label>
+                <input type="email" placeholder="correo@ejemplo.com" disabled
+                       class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Teléfono</label>
+                <input type="tel" placeholder="3001234567" disabled
+                       class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50">
+            </div>
+        </div>
+
+        <label class="flex items-start gap-2 mb-5 cursor-pointer">
+            <input type="checkbox" disabled checked
+                   class="mt-0.5 h-4 w-4 rounded border-gray-300 flex-shrink-0"
+                   style="accent-color: {{ $landingConfig->brand_color }}">
+            <span class="text-xs text-gray-500">Acepto el tratamiento de mis datos personales, términos y condiciones y el envío de comunicaciones SMS.</span>
+        </label>
+
+        <button class="w-full text-white font-bold py-3.5 rounded-xl text-base"
+                style="background:{{ $landingConfig->brand_color }}">
+            {{ $landingConfig->button_text }}
+        </button>
+        <p class="text-xs text-gray-400 text-center mt-3">Tu aceptación quedará registrada con fecha, hora e IP.</p>
+    </div>
+
+    @include('admin.landing-configs._preview_footer', ['config' => $landingConfig])
+</div>
 @endif
 
 </body>

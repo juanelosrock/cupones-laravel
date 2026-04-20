@@ -46,7 +46,7 @@
             {{-- Template picker --}}
             <div class="bg-white rounded-xl shadow-sm p-5">
                 <p class="text-sm font-semibold text-gray-800 mb-3">Plantilla visual <span class="text-red-500">*</span></p>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
                     {{-- Minimal --}}
                     <label class="cursor-pointer group" @click="selectedTemplate='minimal'">
@@ -115,6 +115,35 @@
                             <div class="p-2 text-center border-t border-gray-100">
                                 <p class="text-xs font-semibold text-gray-700">Hero</p>
                                 <p class="text-[10px] text-gray-400">Imagen de fondo, formulario flotante</p>
+                            </div>
+                        </div>
+                    </label>
+
+
+                    {{-- Promo --}}
+                    <label class="cursor-pointer group" @click="selectedTemplate='promo'">
+                        <input type="radio" name="template" value="promo" class="sr-only"
+                               {{ old('template', $config?->template) === 'promo' ? 'checked' : '' }}>
+                        <div class="rounded-xl border-2 transition-all overflow-hidden"
+                             :class="selectedTemplate==='promo' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 group-hover:border-gray-300'">
+                            <div class="h-28 bg-white flex flex-col items-center justify-center px-2 gap-1">
+                                <div class="w-8 h-1 bg-gray-300 rounded-full"></div>
+                                <div class="flex items-baseline gap-0.5" :style="`color:${brandColor}`">
+                                    <span class="text-xl font-black leading-none">50%</span>
+                                    <span class="text-xs font-bold">OFF</span>
+                                </div>
+                                <div class="w-full h-4 bg-gray-900 rounded flex items-center justify-center">
+                                    <div class="w-8 h-1 bg-white/60 rounded-full"></div>
+                                </div>
+                                <div class="w-full space-y-1 mt-1">
+                                    <div class="w-full h-3 border border-gray-200 rounded"></div>
+                                    <div class="w-full h-3 border border-gray-200 rounded"></div>
+                                </div>
+                                <div class="w-full h-4 rounded" :style="`background:${brandColor}`"></div>
+                            </div>
+                            <div class="p-2 text-center border-t border-gray-100">
+                                <p class="text-xs font-semibold text-gray-700">Promo</p>
+                                <p class="text-[10px] text-gray-400">Descuento + registro de cliente</p>
                             </div>
                         </div>
                     </label>

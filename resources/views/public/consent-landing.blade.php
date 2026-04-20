@@ -117,7 +117,7 @@
 {{-- =====================================================================
      TEMPLATE: HERO
      ===================================================================== --}}
-@else
+@elseif($tpl === 'hero')
 @php
     $heroBg = $heroUrl
         ? "background-image:url('" . e($heroUrl) . "');background-size:cover;background-position:center;background-repeat:no-repeat;"
@@ -161,6 +161,126 @@
         @include('public._consent_footer', compact('footerText','brandColor'), ['dark' => true])
 
     </div>
+</div>
+
+{{-- =====================================================================
+     TEMPLATE: PROMO
+     ===================================================================== --}}
+@elseif($tpl === 'promo')
+@php
+    if ($batch && $batch->discount_type === 'percentage') {
+        $promoNum    = rtrim(rtrim(number_format($batch->discount_value, 2, '.', ''), '0'), '.') . '%';
+        $promoSuffix = 'OFF';
+    } elseif ($batch) {
+        $promoNum    = '$ ' . number_format($batch->discount_value, 0, ',', '.');
+        $promoSuffix = 'DE DESC.';
+    } else {
+        $promoNum    = null;
+        $promoSuffix = null;
+    }
+@endphp
+<div class="min-h-screen flex flex-col items-center justify-start py-10 px-4"
+     style="background:{{ $bgColor }};font-family:system-ui,-apple-system,sans-serif;">
+
+    {{-- Logo --}}
+    <div class="w-full max-w-sm mb-4 text-center">
+        @if($logoUrl)
+            <img src="{{ $logoUrl }}" class="h-14 mx-auto object-contain" alt="logo">
+        @else
+            <div style="display:inline-flex;align-items:center;gap:8px;">
+                <div style="width:32px;height:32px;border-radius:8px;background:{{ $brandColor }};display:flex;align-items:center;justify-content:center;">
+                    <span style="color:white;font-weight:700;font-size:0.875rem;">C</span>
+                </div>
+                <span style="font-weight:700;color:#1f2937;font-size:1.125rem;">CuponesHub</span>
+            </div>
+        @endif
+    </div>
+
+    {{-- Discount hero display --}}
+    @if($promoNum)
+    <div class="w-full max-w-sm text-center mb-2">
+        <div style="font-size:4.5rem;font-weight:900;line-height:1;color:{{ $brandColor }};letter-spacing:-2px;">
+            {{ $promoNum }}<span style="font-size:1.8rem;letter-spacing:0;"> {{ $promoSuffix }}</span>
+        </div>
+    </div>
+    @endif
+
+    {{-- Heading badge (e.g. DOMICILIOS) --}}
+    @if($heading)
+    <div class="mb-5 text-center">
+        <div style="display:inline-block;background:#111827;color:white;font-weight:800;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;padding:8px 28px;border-radius:10px;">
+            {{ $heading }}
+        </div>
+    </div>
+    @endif
+
+    @if(!$accepted)
+    {{-- ── Form ── --}}
+    <div style="width:100%;max-width:400px;background:white;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.1);border:1px solid #f3f4f6;padding:24px;">
+
+        <p style="font-weight:700;font-size:1rem;color:#111827;margin-bottom:16px;">
+            {{ $subheading ?: 'Regístrate' }}
+        </p>
+
+        @if($errors->any())
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:16px;">
+            @foreach($errors->all() as $error)
+            <p style="font-size:0.8rem;color:#dc2626;">• {{ $error }}</p>
+            @endforeach
+        </div>
+        @endif
+
+        @if($bodyHtml)
+        <div style="font-size:0.875rem;color:#4b5563;margin-bottom:16px;" class="ql-content">{!! $bodyHtml !!}</div>
+        @endif
+
+        <form method="POST" action="{{ route('public.consent.accept', $recipient->consent_token) }}">
+            @csrf
+            <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:0.75rem;font-weight:500;color:#6b7280;margin-bottom:4px;">E-Mail</label>
+                <input type="email" name="email" value="{{ old('email') }}" placeholder="correo@ejemplo.com"
+                       style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:0.875rem;box-sizing:border-box;outline:none;"
+                       onfocus="this.style.borderColor='{{ $brandColor }}'" onblur="this.style.borderColor='#e5e7eb'">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:0.75rem;font-weight:500;color:#6b7280;margin-bottom:4px;">
+                    Teléfono <span style="color:#ef4444;">*</span>
+                </label>
+                <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="3001234567" required
+                       style="width:100%;border:1px solid {{ $errors->has('phone') ? '#ef4444' : '#e5e7eb' }};border-radius:8px;padding:10px 12px;font-size:0.875rem;box-sizing:border-box;outline:none;"
+                       onfocus="this.style.borderColor='{{ $brandColor }}'" onblur="this.style.borderColor='#e5e7eb'">
+            </div>
+
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:20px;cursor:pointer;">
+                <input type="checkbox" name="accept_all" value="1" required
+                       style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:{{ $brandColor }};"
+                       {{ old('accept_all') ? 'checked' : '' }}>
+                <span style="font-size:0.78rem;color:#6b7280;line-height:1.4;">
+                    Al marcar esta casilla autorizo el tratamiento de mis datos personales, acepto los
+                    <a href="{{ route('public.legal.terms') }}" target="_blank" style="color:{{ $brandColor }};text-decoration:underline;">Términos y Condiciones</a>
+                    y la
+                    <a href="{{ route('public.legal.privacy') }}" target="_blank" style="color:{{ $brandColor }};text-decoration:underline;">Política de Privacidad</a>,
+                    y consiento el envío de comunicaciones SMS, conforme a la Ley 1581 de 2012.
+                </span>
+            </label>
+
+            <button type="submit"
+                    style="width:100%;background:{{ $brandColor }};color:white;font-weight:700;font-size:1rem;padding:14px;border:none;border-radius:12px;cursor:pointer;transition:opacity .15s;"
+                    onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
+                {{ $btnText }}
+            </button>
+        </form>
+        <p style="font-size:0.7rem;color:#9ca3af;text-align:center;margin-top:12px;">
+            Tu aceptación quedará registrada con fecha, hora e IP para cumplimiento legal.
+        </p>
+    </div>
+
+    @else
+    {{-- ── Success ── --}}
+    @include('public._consent_body', compact('accepted','recipient','heading','subheading','bodyHtml','btnText','okHeading','okText','batch','customerName','brandColor','legalDoc','discountBadge'))
+    @endif
+
+    @include('public._consent_footer', compact('footerText','brandColor'))
 </div>
 @endif
 

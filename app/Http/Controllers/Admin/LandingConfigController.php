@@ -88,7 +88,7 @@ class LandingConfigController extends Controller
     {
         return $request->validate([
             'name'            => 'required|string|max:150',
-            'template'        => 'required|in:minimal,branded,hero',
+            'template'        => 'required|in:minimal,branded,hero,promo',
             'brand_color'     => 'required|string|max:20',
             'bg_color'        => 'required|string|max:20',
             'heading'         => 'required|string|max:200',
