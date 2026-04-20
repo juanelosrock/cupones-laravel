@@ -118,43 +118,49 @@
      TEMPLATE: HERO
      ===================================================================== --}}
 @else
-<div class="min-h-screen flex flex-col items-center justify-start pt-10 pb-12 px-4 relative"
-     style="font-family: system-ui, -apple-system, sans-serif;">
+@php
+    $heroBg = $heroUrl
+        ? "background-image:url('" . e($heroUrl) . "');background-size:cover;background-position:center;background-repeat:no-repeat;"
+        : "background:linear-gradient(135deg,{$brandColor} 0%,#0f172a 100%);";
+@endphp
+<div class="min-h-screen flex flex-col items-center justify-start pt-10 pb-12 px-4"
+     style="position:relative;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;{{ $heroBg }}">
 
-    {{-- Background --}}
+    {{-- Dark overlay (solo cuando hay imagen) --}}
     @if($heroUrl)
-    <div class="fixed inset-0 -z-10">
-        <img src="{{ $heroUrl }}" class="w-full h-full object-cover" alt="">
-        <div class="absolute inset-0 bg-black/55"></div>
-    </div>
-    @else
-    <div class="fixed inset-0 -z-10"
-         style="background: linear-gradient(135deg, {{ $brandColor }} 0%, #0f172a 100%)"></div>
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:0;"></div>
     @endif
 
-    {{-- Logo --}}
-    <div class="w-full max-w-md mb-6 text-center">
-        @if($logoUrl)
-            <img src="{{ $logoUrl }}" class="h-12 mx-auto object-contain"
-                 style="filter: brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.5))" alt="logo">
-        @else
-            <div class="inline-flex items-center gap-2">
-                <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <span class="text-white font-bold">C</span>
+    {{-- Contenido por encima del overlay --}}
+    <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;">
+
+        {{-- Logo --}}
+        <div class="w-full max-w-md mb-6 text-center">
+            @if($logoUrl)
+                <img src="{{ $logoUrl }}" class="h-12 mx-auto object-contain"
+                     style="filter:brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,.5))" alt="logo">
+            @else
+                <div class="inline-flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                         style="background:rgba(255,255,255,.2);backdrop-filter:blur(8px)">
+                        <span style="color:#fff;font-weight:700;">C</span>
+                    </div>
+                    <span style="color:#fff;font-weight:700;font-size:1.25rem;text-shadow:0 1px 4px rgba(0,0,0,.4)">CuponesHub</span>
                 </div>
-                <span class="font-bold text-white text-xl drop-shadow">CuponesHub</span>
+            @endif
+            @if($discountBadge)
+            <div class="inline-flex items-center gap-1.5 text-white text-xs font-semibold px-3 py-1 rounded-full mt-2"
+                 style="background:rgba(255,255,255,.2);backdrop-filter:blur(8px)">
+                🎁 {{ $discountBadge }} te espera
             </div>
-        @endif
-        @if($discountBadge)
-        <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full mt-2">
-            🎁 {{ $discountBadge }} te espera
+            @endif
         </div>
-        @endif
+
+        @include('public._consent_body', compact('accepted','recipient','heading','subheading','bodyHtml','btnText','okHeading','okText','batch','customerName','brandColor','legalDoc','discountBadge'), ['heroMode' => true])
+
+        @include('public._consent_footer', compact('footerText','brandColor'), ['dark' => true])
+
     </div>
-
-    @include('public._consent_body', compact('accepted','recipient','heading','subheading','bodyHtml','btnText','okHeading','okText','batch','customerName','brandColor','legalDoc','discountBadge'), ['heroMode' => true])
-
-    @include('public._consent_footer', compact('footerText','brandColor'), ['dark' => true])
 </div>
 @endif
 
