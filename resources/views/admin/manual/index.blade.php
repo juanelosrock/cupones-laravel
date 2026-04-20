@@ -7,7 +7,7 @@
         <h1 class="text-2xl font-bold text-gray-900">Manual de Usuario</h1>
         <p class="text-sm text-gray-500 mt-0.5">Guía completa para el uso del panel de administración CuponesHub</p>
     </div>
-    <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-medium">v1.0 — Abril 2026</span>
+    <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-medium">v1.1 — Abril 2026</span>
 </div>
 
 <div class="flex gap-6">
@@ -774,25 +774,43 @@
 
             <h3 class="text-sm font-semibold text-gray-800 mb-2">Cómo usarlo</h3>
             <ol class="text-sm text-gray-600 space-y-1.5 list-decimal list-inside mb-4">
-                <li>En el panel izquierdo, selecciona el cliente API del dropdown o escribe el <code class="bg-gray-100 px-1 rounded text-xs">Client ID</code> y <code class="bg-gray-100 px-1 rounded text-xs">Client Secret</code> manualmente.</li>
+                <li>En el panel izquierdo, selecciona el cliente API del dropdown (se pre-llena el Client ID) o escríbelo manualmente junto con el <code class="bg-gray-100 px-1 rounded text-xs">Client Secret</code>.</li>
                 <li>Haz clic en el endpoint que quieres probar (agrupados por Cupones, Clientes, Legal, Sistema).</li>
-                <li>Modifica el <strong>Body (JSON)</strong> con los datos de prueba que necesitas.</li>
-                <li>Si el endpoint requiere un parámetro de ruta (como <code class="bg-gray-100 px-1 rounded text-xs">{code}</code>), edítalo en la pestaña <strong>Path params</strong>.</li>
-                <li>Haz clic en <strong>Enviar</strong> — verás la respuesta JSON debajo con el código HTTP y el tiempo de respuesta.</li>
+                <li>Modifica el <strong>Body (JSON)</strong> con los datos de prueba. Usa el botón <strong>Formatear</strong> para darle formato automático.</li>
+                <li>Si el endpoint tiene parámetro en la ruta (ej: <code class="bg-gray-100 px-1 rounded text-xs">{code}</code>), edítalo en la pestaña <strong>Path params</strong>.</li>
+                <li>Revisa los headers que se enviarán en la pestaña <strong>Headers</strong>.</li>
+                <li>Haz clic en <strong>Enviar</strong> — verás la respuesta con código HTTP, tiempo de respuesta y el JSON completo.</li>
             </ol>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Exportar como cURL o PHP</h3>
+            <p class="text-sm text-gray-600 mb-3">
+                El botón <strong>Exportar</strong> (junto al botón Enviar) genera el código completo de la petición
+                lista para copiar y usar fuera del panel:
+            </p>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs">
+                    <p class="font-semibold text-gray-800 mb-1">cURL</p>
+                    <p class="text-gray-500">Comando listo para pegar en terminal. Compatible con Postman e Insomnia (importar cURL).</p>
+                </div>
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs">
+                    <p class="font-semibold text-gray-800 mb-1">PHP (cURL)</p>
+                    <p class="text-gray-500">Código PHP completo con <code class="bg-gray-100 px-1 rounded">curl_setopt_array</code>, <code class="bg-gray-100 px-1 rounded">json_encode</code> y manejo de errores listo para integrar.</p>
+                </div>
+            </div>
 
             <h3 class="text-sm font-semibold text-gray-800 mb-2">Notas importantes</h3>
             <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside mb-4">
-                <li>Las peticiones se envían <strong>directamente desde tu navegador</strong> hacia el API — no pasan por el servidor del panel.</li>
-                <li>Las credenciales se guardan temporalmente en el almacenamiento local del navegador para mayor comodidad.</li>
+                <li>Las peticiones se envían <strong>directamente desde tu navegador</strong> — no pasan por el servidor del panel.</li>
+                <li>Las credenciales se guardan en el <em>localStorage</em> del navegador para no tener que reingresarlas.</li>
                 <li>El endpoint <strong>POST /coupons/redeem</strong> <span class="text-red-600 font-medium">consume el cupón</span> — úsalo con cuidado en producción.</li>
                 <li>Los endpoints de <strong>Legal</strong> y <strong>Health</strong> son públicos y no requieren credenciales.</li>
+                <li>Los canales válidos para redimir son: <code class="bg-gray-100 px-1 rounded">api</code>, <code class="bg-gray-100 px-1 rounded">web</code>, <code class="bg-gray-100 px-1 rounded">pos</code>, <code class="bg-gray-100 px-1 rounded">app</code>, <code class="bg-gray-100 px-1 rounded">manual</code>, <code class="bg-gray-100 px-1 rounded">sms</code>.</li>
             </ul>
 
             <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
                 <strong>Tip:</strong> Usa el API Tester con las credenciales del cliente "Demo" para hacer pruebas
-                sin afectar clientes de producción. El secret del cliente demo lo encuentras en la sección
-                de <strong>API Clients</strong> → demo → ver detalle.
+                sin afectar datos de producción. El secret del cliente demo lo encuentras en
+                <strong>API Clients → ch_demo_client → ver detalle</strong>.
             </div>
         </div>
 
@@ -870,6 +888,10 @@
                      'En el módulo de Redenciones, filtra según necesites y usa el botón Exportar CSV que aparece en la esquina superior del listado. El archivo se descarga con todos los registros del filtro activo.'],
                     ['Un cliente dice que no puede redimir su cupón aunque es válido. ¿Qué reviso?',
                      'Verifica: (1) Que el lote esté en estado Activo. (2) Que la fecha actual esté dentro del rango de validez. (3) Que el cliente no esté bloqueado. (4) Que no haya alcanzado el límite de usos por usuario. (5) Que el monto de la compra cumpla con el mínimo requerido.'],
+                    ['Subí una imagen de fondo en la landing page pero no se ve en el preview. ¿Qué hago?',
+                     'La imagen de fondo solo aplica al template Hero. Verifica que en la configuración de tu landing page el campo "Plantilla" esté seleccionado como Hero (el tercero, con fondo oscuro). Si usas Minimal o Branded, la imagen de fondo no se muestra. Edita la landing, cambia la plantilla a Hero y guarda.'],
+                    ['El logo de la landing page aparece roto (URL de imagen no encontrada). ¿Cómo lo soluciono?',
+                     'Si subiste el logo desde tu computadora, el archivo se guarda en el servidor. Asegúrate de que el servidor tenga el enlace de almacenamiento activo (php artisan storage:link). Si cambiaste de servidor, deberás subir la imagen nuevamente desde el panel de edición de la landing page.'],
                 ];
                 @endphp
 
@@ -895,7 +917,7 @@
 
         {{-- Footer del manual --}}
         <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 text-center">
-            <p class="text-xs text-gray-400">Manual de Usuario — CuponesHub v1.0 · Abril 2026</p>
+            <p class="text-xs text-gray-400">Manual de Usuario — CuponesHub v1.1 · Abril 2026</p>
             <p class="text-xs text-gray-400 mt-1">Para soporte técnico o consultas, contacta al administrador del sistema.</p>
         </div>
 
