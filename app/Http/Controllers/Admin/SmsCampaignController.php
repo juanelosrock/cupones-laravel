@@ -195,11 +195,24 @@ class SmsCampaignController extends Controller
         SmsRecipient::insert($rows);
         $smsCampaign->increment('total_recipients', count($rows));
 
+        // Si la campaña ya fue enviada o está enviando, despachar el job para procesar los nuevos pendientes
+        $shouldDispatch = in_array($smsCampaign->status, ['sending', 'sent', 'failed']);
+        if ($shouldDispatch) {
+            ProcessSmsCampaign::dispatch($smsCampaign);
+            $smsCampaign->update(['status' => 'sending', 'finished_at' => null]);
+        }
+
         AuditService::log('recipients_synced', SmsCampaign::class, $smsCampaign->id, [], [
-            'added' => count($rows),
+            'added'      => count($rows),
+            'dispatched' => $shouldDispatch,
         ]);
 
-        return back()->with('success', count($rows) . ' clientes nuevos añadidos como destinatarios de la campaña SMS.');
+        $msg = count($rows) . ' clientes nuevos añadidos como destinatarios.';
+        $msg .= $shouldDispatch
+            ? ' El envío fue despachado a la cola automáticamente.'
+            : ' Usa "Enviar ahora" cuando estés listo para enviar.';
+
+        return back()->with('success', $msg);
     }
 
     public function send(SmsCampaign $smsCampaign)
