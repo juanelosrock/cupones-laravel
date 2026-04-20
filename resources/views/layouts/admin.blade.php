@@ -11,13 +11,13 @@
 <body class="bg-gray-100 min-h-screen" x-data="{ sidebarOpen: false }">
 
 <!-- Sidebar -->
-<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-blue-900 text-white transform transition-transform duration-200"
+<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-blue-900 text-white flex flex-col transform transition-transform duration-200"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
-    <div class="flex items-center justify-between h-16 px-6 bg-blue-950">
+    <div class="flex items-center justify-between h-16 px-6 bg-blue-950 flex-shrink-0">
         <span class="text-xl font-bold tracking-tight">🎟 CuponesHub</span>
         <button @click="sidebarOpen=false" class="lg:hidden text-blue-300 hover:text-white">✕</button>
     </div>
-    <nav class="mt-4 px-3 space-y-1 text-sm">
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1 text-sm">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-800 {{ request()->routeIs('admin.dashboard') ? 'bg-blue-800' : '' }}">
             📊 Dashboard
         </a>
