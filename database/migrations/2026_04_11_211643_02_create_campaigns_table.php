@@ -8,7 +8,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name', 150);
             $table->text('description')->nullable();
-            $table->enum('type', ['general', 'sms', 'product', 'activation'])->default('general');
+            $table->enum('type', ['general', 'sms', 'product', 'activation', 'autorizacion'])->default('general');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->decimal('budget', 15, 2)->nullable();
