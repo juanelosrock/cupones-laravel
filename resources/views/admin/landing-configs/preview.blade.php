@@ -261,7 +261,7 @@
         @endif
 
         <div style="display:flex;align-items:baseline;justify-content:center;line-height:1;color:{{ $landingConfig->brand_color }};">
-            <span style="font-size:5.5rem;font-weight:900;letter-spacing:-3px;">{{ $prevDiscount }}</span><span style="font-size:2.6rem;font-weight:900;letter-spacing:-1px;">{{ $prevLabel }}</span>
+            <span style="font-size:5.5rem;font-weight:900;letter-spacing:-3px;">{{ $prevDiscount }}</span><span style="font-size:3.8rem;font-weight:900;letter-spacing:-1px;">{{ $prevLabel }}</span>
         </div>
 
         @if($landingConfig->heading)

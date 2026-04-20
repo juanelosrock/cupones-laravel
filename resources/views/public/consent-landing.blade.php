@@ -200,7 +200,7 @@
         {{-- Discount display --}}
         @if($promoNum)
         <div style="display:flex;align-items:baseline;justify-content:center;line-height:1;color:{{ $brandColor }};">
-            <span style="font-size:5.5rem;font-weight:900;letter-spacing:-3px;">{{ $promoNum }}</span><span style="font-size:2.6rem;font-weight:900;letter-spacing:-1px;">{{ $promoSuffix }}</span>
+            <span style="font-size:5.5rem;font-weight:900;letter-spacing:-3px;">{{ $promoNum }}</span><span style="font-size:3.8rem;font-weight:900;letter-spacing:-1px;">{{ $promoSuffix }}</span>
         </div>
         @endif
 
