@@ -182,37 +182,36 @@
 <div class="min-h-screen flex flex-col items-center justify-start py-10 px-4"
      style="background:{{ $bgColor }};font-family:system-ui,-apple-system,sans-serif;">
 
-    {{-- Logo --}}
-    <div class="w-full max-w-sm mb-4 text-center">
+    {{-- Card superior: logo + descuento --}}
+    <div style="width:100%;max-width:400px;background:white;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.1);border:1px solid #e5e7eb;padding:24px 24px 20px;text-align:center;margin-bottom:12px;">
+
+        {{-- Logo --}}
         @if($logoUrl)
-            <img src="{{ $logoUrl }}" class="h-14 mx-auto object-contain" alt="logo">
+            <img src="{{ $logoUrl }}" style="height:72px;max-width:100%;object-fit:contain;display:block;margin:0 auto 16px;" alt="logo">
         @else
-            <div style="display:inline-flex;align-items:center;gap:8px;">
-                <div style="width:32px;height:32px;border-radius:8px;background:{{ $brandColor }};display:flex;align-items:center;justify-content:center;">
-                    <span style="color:white;font-weight:700;font-size:0.875rem;">C</span>
+            <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;">
+                <div style="width:36px;height:36px;border-radius:8px;background:{{ $brandColor }};display:flex;align-items:center;justify-content:center;">
+                    <span style="color:white;font-weight:700;font-size:1rem;">C</span>
                 </div>
-                <span style="font-weight:700;color:#1f2937;font-size:1.125rem;">CuponesHub</span>
+                <span style="font-weight:700;color:#1f2937;font-size:1.25rem;">CuponesHub</span>
             </div>
         @endif
-    </div>
 
-    {{-- Discount hero display --}}
-    @if($promoNum)
-    <div class="w-full max-w-sm text-center mb-2">
-        <div style="font-size:4.5rem;font-weight:900;line-height:1;color:{{ $brandColor }};letter-spacing:-2px;">
-            {{ $promoNum }}<span style="font-size:1.8rem;letter-spacing:0;"> {{ $promoSuffix }}</span>
+        {{-- Discount display --}}
+        @if($promoNum)
+        <div style="display:flex;align-items:baseline;justify-content:center;line-height:1;color:{{ $brandColor }};">
+            <span style="font-size:5.5rem;font-weight:900;letter-spacing:-3px;">{{ $promoNum }}</span><span style="font-size:2.6rem;font-weight:900;letter-spacing:-1px;">{{ $promoSuffix }}</span>
         </div>
-    </div>
-    @endif
+        @endif
 
-    {{-- Heading badge (e.g. DOMICILIOS) --}}
-    @if($heading)
-    <div class="mb-5 text-center">
-        <div style="display:inline-block;background:#111827;color:white;font-weight:800;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;padding:8px 28px;border-radius:10px;">
+        {{-- Heading badge (e.g. DOMICILIOS) --}}
+        @if($heading)
+        <div style="display:inline-block;background:#111827;color:white;font-weight:800;font-size:1.1rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 24px;border-radius:8px;margin-top:10px;">
             {{ $heading }}
         </div>
+        @endif
+
     </div>
-    @endif
 
     @if(!$accepted)
     {{-- ── Form ── --}}

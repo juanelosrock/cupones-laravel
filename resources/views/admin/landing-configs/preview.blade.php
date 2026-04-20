@@ -246,32 +246,30 @@
 <div class="min-h-screen flex flex-col items-center justify-start py-10 px-4"
      style="background: {{ $landingConfig->bg_color }}; font-family: system-ui,-apple-system,sans-serif;">
 
-    {{-- Logo --}}
-    <div class="w-full max-w-sm mb-5 text-center">
+    {{-- Card superior: logo + descuento --}}
+    <div style="width:100%;max-width:400px;background:white;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.1);border:1px solid #e5e7eb;padding:24px 24px 20px;text-align:center;margin-bottom:12px;">
+
         @if($landingConfig->logo_url)
-            <img src="{{ $landingConfig->logo_url }}" class="h-14 mx-auto object-contain" alt="logo">
+            <img src="{{ $landingConfig->logo_url }}" style="height:72px;max-width:100%;object-fit:contain;display:block;margin:0 auto 16px;" alt="logo">
         @else
-            <div class="inline-flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center"
-                     style="background:{{ $landingConfig->brand_color }}">
-                    <span class="text-white font-bold text-sm">C</span>
+            <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;">
+                <div style="width:36px;height:36px;border-radius:8px;background:{{ $landingConfig->brand_color }};display:flex;align-items:center;justify-content:center;">
+                    <span style="color:white;font-weight:700;font-size:1rem;">C</span>
                 </div>
-                <span class="font-bold text-gray-800 text-lg">CuponesHub</span>
+                <span style="font-weight:700;color:#1f2937;font-size:1.25rem;">CuponesHub</span>
             </div>
         @endif
-    </div>
 
-    {{-- Discount hero --}}
-    <div class="w-full max-w-sm text-center mb-3">
-        <div class="leading-none font-black tracking-tighter"
-             style="font-size:5rem; color:{{ $landingConfig->brand_color }}; text-shadow:2px 2px 0 {{ $landingConfig->brand_color }}33">
-            {{ $prevDiscount }}<span style="font-size:2.5rem">{{ $prevLabel }}</span>
+        <div style="display:flex;align-items:baseline;justify-content:center;line-height:1;color:{{ $landingConfig->brand_color }};">
+            <span style="font-size:5.5rem;font-weight:900;letter-spacing:-3px;">{{ $prevDiscount }}</span><span style="font-size:2.6rem;font-weight:900;letter-spacing:-1px;">{{ $prevLabel }}</span>
         </div>
+
         @if($landingConfig->heading)
-        <div class="inline-block bg-gray-900 text-white font-extrabold uppercase tracking-widest px-6 py-2 rounded-lg mt-1 text-lg">
+        <div style="display:inline-block;background:#111827;color:white;font-weight:800;font-size:1.1rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 24px;border-radius:8px;margin-top:10px;">
             {{ $landingConfig->heading }}
         </div>
         @endif
+
     </div>
 
     {{-- Form card --}}
