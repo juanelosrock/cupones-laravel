@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessSmsCampaign;
 use App\Models\Campaign;
+use App\Models\CampaignCustomer;
 use App\Models\CouponBatch;
 use App\Models\SmsCampaign;
 use App\Models\SmsRecipient;
@@ -144,12 +145,61 @@ class SmsCampaignController extends Controller
                 : null,
         ];
 
+        // Clientes de la campaña padre que aún no son destinatarios de esta SMS campaign
+        $missingCount = $smsCampaign->campaign_id
+            ? CampaignCustomer::where('campaign_id', $smsCampaign->campaign_id)
+                ->join('customers', 'customers.id', '=', 'campaign_customers.customer_id')
+                ->whereNotNull('customers.phone')
+                ->whereNotIn('campaign_customers.customer_id',
+                    SmsRecipient::where('sms_campaign_id', $smsCampaign->id)->select('customer_id')
+                )
+                ->count()
+            : 0;
+
         $recipients = $smsCampaign->recipients()
             ->with('customer')
             ->orderByRaw("FIELD(status, 'failed', 'pending', 'sent')")
             ->paginate(30);
 
-        return view('admin.sms-campaigns.show', compact('smsCampaign', 'recipients', 'recipientStats'));
+        return view('admin.sms-campaigns.show', compact('smsCampaign', 'recipients', 'recipientStats', 'missingCount'));
+    }
+
+    public function syncRecipients(SmsCampaign $smsCampaign)
+    {
+        if (!$smsCampaign->campaign_id) {
+            return back()->with('error', 'Esta campaña SMS no tiene una campaña vinculada.');
+        }
+
+        $missing = CampaignCustomer::where('campaign_id', $smsCampaign->campaign_id)
+            ->join('customers', 'customers.id', '=', 'campaign_customers.customer_id')
+            ->whereNotNull('customers.phone')
+            ->whereNotIn('campaign_customers.customer_id',
+                SmsRecipient::where('sms_campaign_id', $smsCampaign->id)->select('customer_id')
+            )
+            ->select('customers.id', 'customers.phone')
+            ->get();
+
+        if ($missing->isEmpty()) {
+            return back()->with('info', 'Todos los clientes de la campaña ya están incluidos como destinatarios.');
+        }
+
+        $rows = $missing->map(fn($c) => [
+            'sms_campaign_id' => $smsCampaign->id,
+            'customer_id'     => $c->id,
+            'phone'           => $c->phone,
+            'consent_token'   => $smsCampaign->send_consent_link ? (string) Str::uuid() : null,
+            'status'          => 'pending',
+            'created_at'      => now(),
+        ])->all();
+
+        SmsRecipient::insert($rows);
+        $smsCampaign->increment('total_recipients', count($rows));
+
+        AuditService::log('recipients_synced', SmsCampaign::class, $smsCampaign->id, [], [
+            'added' => count($rows),
+        ]);
+
+        return back()->with('success', count($rows) . ' clientes nuevos añadidos como destinatarios de la campaña SMS.');
     }
 
     public function send(SmsCampaign $smsCampaign)

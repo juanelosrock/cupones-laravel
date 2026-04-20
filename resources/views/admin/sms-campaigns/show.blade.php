@@ -93,6 +93,20 @@
             </form>
         @endif
 
+        {{-- Sincronizar clientes --}}
+        @if($missingCount > 0 && $smsCampaign->status !== 'cancelled')
+            <form method="POST" action="{{ route('admin.sms-campaigns.sync-recipients', $smsCampaign) }}"
+                  onsubmit="return confirm('¿Añadir {{ number_format($missingCount) }} clientes nuevos de la campaña como destinatarios?')">
+                @csrf
+                <button class="relative bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Sincronizar {{ number_format($missingCount) }} clientes
+                </button>
+            </form>
+        @endif
+
         <a href="{{ route('admin.sms-campaigns.index') }}"
            class="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
             ← Volver
@@ -108,6 +122,43 @@
 @endif
 @if(session('error'))
     <div class="mb-4 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">{{ session('error') }}</div>
+@endif
+@if(session('info'))
+    <div class="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800 flex items-center gap-2">
+        <span>ℹ️</span> {{ session('info') }}
+    </div>
+@endif
+
+{{-- Banner: clientes sin sincronizar --}}
+@if($missingCount > 0 && $smsCampaign->status !== 'cancelled')
+    <div class="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between gap-4">
+        <div class="flex items-start gap-3">
+            <span class="text-amber-500 text-lg mt-0.5">⚠️</span>
+            <div>
+                <p class="text-sm font-semibold text-amber-800">
+                    {{ number_format($missingCount) }} {{ $missingCount === 1 ? 'cliente' : 'clientes' }} de la campaña no {{ $missingCount === 1 ? 'está' : 'están' }} incluido{{ $missingCount === 1 ? '' : 's' }} como destinatario{{ $missingCount === 1 ? '' : 's' }}
+                </p>
+                <p class="text-xs text-amber-700 mt-0.5">
+                    Han sido asignados a <strong>{{ $smsCampaign->campaign?->name }}</strong> pero aún no aparecen en esta campaña SMS.
+                </p>
+            </div>
+        </div>
+        @if($smsCampaign->campaign_id)
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="{{ route('admin.campaigns.show', $smsCampaign->campaign_id) }}"
+               class="text-xs text-amber-700 underline hover:text-amber-900 whitespace-nowrap">
+                Ver campaña →
+            </a>
+            <form method="POST" action="{{ route('admin.sms-campaigns.sync-recipients', $smsCampaign) }}"
+                  onsubmit="return confirm('¿Añadir {{ number_format($missingCount) }} clientes como destinatarios?')">
+                @csrf
+                <button class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap">
+                    Sincronizar ahora
+                </button>
+            </form>
+        </div>
+        @endif
+    </div>
 @endif
 
 {{-- Queue warning: mostrar si hay pendientes pero no está running --}}
