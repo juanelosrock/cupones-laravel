@@ -236,12 +236,17 @@
      ===================================================================== --}}
 @elseif($landingConfig->template === 'promo')
 @php
-    $prevDiscount = $landingConfig->couponBatch?->discount_type === 'percentage'
-        ? $landingConfig->couponBatch->discount_value . '%'
-        : null;
-    $prevLabel    = $prevDiscount ? 'OFF' : null;
-    // fallback demo values for preview
-    if (!$prevDiscount) { $prevDiscount = '50%'; $prevLabel = 'OFF'; }
+    $prevBatch = $landingConfig->smsCampaigns->first()?->couponBatch;
+    if ($prevBatch && $prevBatch->discount_type === 'percentage') {
+        $prevDiscount = rtrim(rtrim(number_format($prevBatch->discount_value, 2, '.', ''), '0'), '.') . '%';
+        $prevLabel    = 'OFF';
+    } elseif ($prevBatch) {
+        $prevDiscount = '$ ' . number_format($prevBatch->discount_value, 0, ',', '.');
+        $prevLabel    = 'DE DESC.';
+    } else {
+        $prevDiscount = null;
+        $prevLabel    = null;
+    }
 @endphp
 <div class="min-h-screen flex flex-col items-center justify-start py-10 px-4"
      style="background: {{ $landingConfig->bg_color }}; font-family: system-ui,-apple-system,sans-serif;">
@@ -260,9 +265,13 @@
             </div>
         @endif
 
+        @if($prevDiscount)
         <div style="display:flex;align-items:baseline;justify-content:center;line-height:1;color:{{ $landingConfig->brand_color }};">
             <span style="font-size:5.5rem;font-weight:900;letter-spacing:-3px;">{{ $prevDiscount }}</span><span style="font-size:3.8rem;font-weight:900;letter-spacing:-1px;">{{ $prevLabel }}</span>
         </div>
+        @else
+        <div style="font-size:0.75rem;color:#9ca3af;padding:12px 0;">Sin cupón asociado a esta landing</div>
+        @endif
 
         @if($landingConfig->heading)
         <div style="display:inline-block;background:#111827;color:white;font-weight:800;font-size:1.1rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 24px;border-radius:8px;margin-top:10px;">

@@ -79,6 +79,7 @@ class LandingConfigController extends Controller
 
     public function preview(LandingPageConfig $landingConfig)
     {
+        $landingConfig->load('smsCampaigns.couponBatch');
         return view('admin.landing-configs.preview', ['landingConfig' => $landingConfig]);
     }
 
