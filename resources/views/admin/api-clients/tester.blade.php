@@ -469,11 +469,11 @@ function apiTester() {
                         path: '/customers/accept-terms',
                         shortPath: '/customers/accept-terms',
                         requiresAuth: true,
-                        description: 'Registra la aceptación de un documento legal por parte del cliente.',
+                        description: 'Registra la aceptación de documentos legales por parte del cliente (Ley 1581). Campos: phone (requerido), document_types (array: privacy, terms, sms_consent), channel (opcional).',
                         defaultBody: JSON.stringify({
-                            document_number: "12345678",
-                            document_type: "terms",
-                            ip_address: "192.168.1.1"
+                            phone: "3001234567",
+                            document_types: ["terms", "privacy"],
+                            channel: "api"
                         }, null, 2),
                     },
                 ],
