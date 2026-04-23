@@ -81,11 +81,13 @@ class EmailService
             'Authorization' => "App {$apiKey}",
             'Content-Type'  => 'application/json',
             'Accept'        => 'application/json',
-        ])->post("{$baseUrl}/email/3/send", [
-            'from'     => "{$fromName} <{$fromEmail}>",
-            'to'       => $to,
-            'subject'  => $subject,
-            'htmlBody' => $htmlBody,
+        ])->post("{$baseUrl}/email/3/messages", [
+            'messages' => [[
+                'from'     => "{$fromName} <{$fromEmail}>",
+                'to'       => [['to' => $to]],
+                'subject'  => $subject,
+                'htmlBody' => $htmlBody,
+            ]],
         ]);
 
         if ($response->successful()) {
