@@ -49,7 +49,7 @@ class EmailService
                 [
                     'type'    => 'email',
                     'subject' => $subject,
-                    'body'    => $htmlBody,
+                    'html'    => $htmlBody,
                 ],
             ],
         ]);
