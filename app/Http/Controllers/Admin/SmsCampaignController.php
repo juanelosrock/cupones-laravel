@@ -53,8 +53,8 @@ class SmsCampaignController extends Controller
         // Build campaign data for Alpine.js (customers + batches per campaign)
         $campaignData = $campaigns->mapWithKeys(function ($campaign) {
             $batches = $campaign->couponBatches()
-                ->where('status', 'active')
-                ->get(['id', 'name', 'code_type', 'general_code', 'discount_type', 'discount_value', 'prefix'])
+                ->whereIn('status', ['active', 'paused'])
+                ->get(['id', 'name', 'status', 'code_type', 'general_code', 'discount_type', 'discount_value', 'prefix'])
                 ->map(fn($b) => [
                     'id'             => $b->id,
                     'name'           => $b->name,
@@ -63,6 +63,7 @@ class SmsCampaignController extends Controller
                     'discount_type'  => $b->discount_type,
                     'discount_value' => $b->discount_value,
                     'prefix'         => $b->prefix,
+                    'batch_status'   => $b->status,
                     'label'          => $b->code_type === 'general'
                         ? "{$b->name} (código: {$b->general_code})"
                         : "{$b->name} (códigos únicos, prefijo: {$b->prefix})",
@@ -161,7 +162,15 @@ class SmsCampaignController extends Controller
             ->orderByRaw("FIELD(status, 'failed', 'pending', 'sent')")
             ->paginate(30);
 
-        return view('admin.sms-campaigns.show', compact('smsCampaign', 'recipients', 'recipientStats', 'missingCount'));
+        // Batches available to link (from the parent campaign, or all if no campaign)
+        $availableBatches = $smsCampaign->campaign_id
+            ? CouponBatch::where('campaign_id', $smsCampaign->campaign_id)
+                ->whereIn('status', ['active', 'paused'])
+                ->orderBy('name')
+                ->get(['id', 'name', 'status', 'code_type', 'general_code', 'prefix', 'discount_type', 'discount_value'])
+            : collect();
+
+        return view('admin.sms-campaigns.show', compact('smsCampaign', 'recipients', 'recipientStats', 'missingCount', 'availableBatches'));
     }
 
     public function syncRecipients(SmsCampaign $smsCampaign)
@@ -310,5 +319,26 @@ class SmsCampaignController extends Controller
         $smsCampaign->update(['status' => 'sending', 'finished_at' => null]);
 
         return back()->with('success', "Reintentando envío a {$recipient->phone}.");
+    }
+
+    public function linkBatch(Request $request, SmsCampaign $smsCampaign)
+    {
+        $data = $request->validate([
+            'coupon_batch_id' => 'nullable|exists:coupon_batches,id',
+        ]);
+
+        $old = $smsCampaign->coupon_batch_id;
+        $smsCampaign->update(['coupon_batch_id' => $data['coupon_batch_id'] ?? null]);
+
+        AuditService::log('batch_linked', SmsCampaign::class, $smsCampaign->id,
+            ['coupon_batch_id' => $old],
+            ['coupon_batch_id' => $smsCampaign->coupon_batch_id]
+        );
+
+        $msg = $smsCampaign->coupon_batch_id
+            ? 'Lote de cupones vinculado correctamente.'
+            : 'Lote de cupones desvinculado.';
+
+        return back()->with('success', $msg);
     }
 }

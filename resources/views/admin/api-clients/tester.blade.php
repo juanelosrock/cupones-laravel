@@ -494,6 +494,26 @@ function apiTester() {
                 ],
             },
             {
+                label: 'Notificaciones',
+                endpoints: [
+                    {
+                        id: 'notify-send',
+                        method: 'POST',
+                        path: '/notify/send',
+                        shortPath: '/notify/send',
+                        requiresAuth: true,
+                        description: 'Envía simultáneamente un SMS y un email. Retorna el estado de cada canal. Rate limit: 20/min.',
+                        defaultBody: JSON.stringify({
+                            phone: "3001234567",
+                            email: "cliente@ejemplo.com",
+                            sms_text: "Hola, tu descuento exclusivo está disponible. Más info en tu correo.",
+                            email_subject: "Tu descuento exclusivo te espera 🎁",
+                            email_template: "<html><body style=\"font-family:sans-serif;padding:24px\">\n  <h1 style=\"color:#1e40af\">¡Hola!</h1>\n  <p>Tu descuento exclusivo está listo.</p>\n  <p><strong>Código:</strong> PROMO25</p>\n  <a href=\"#\" style=\"background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none\">Usar mi descuento</a>\n</body></html>"
+                        }, null, 2),
+                    },
+                ],
+            },
+            {
                 label: 'Sistema',
                 endpoints: [
                     {

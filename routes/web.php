@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Admin\EmailCampaignController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Public\ConsentLandingController;
 use App\Http\Controllers\Public\CouponLandingController;
@@ -98,6 +99,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('sms-campaigns/{smsCampaign}/recipients/{recipient}/retry', [Admin\SmsCampaignController::class, 'retryRecipient'])->name('sms-campaigns.recipients.retry');
     Route::post('sms-campaigns/{smsCampaign}/sync-recipients',             [Admin\SmsCampaignController::class, 'syncRecipients'])->name('sms-campaigns.sync-recipients');
     Route::post('sms-campaigns/{smsCampaign}/process-pending',            [Admin\SmsCampaignController::class, 'processPending'])->name('sms-campaigns.process-pending');
+    Route::post('sms-campaigns/{smsCampaign}/link-batch',                 [Admin\SmsCampaignController::class, 'linkBatch'])->name('sms-campaigns.link-batch');
 
     // API Clients — rutas fijas ANTES de {apiClient}
     Route::get('api-clients',                               [Admin\ApiClientController::class, 'index'])->name('api-clients.index');
@@ -125,6 +127,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('audit',                                           [Admin\AuditController::class, 'index'])->name('audit.index');
     Route::get('audit/{auditLog}',                                [Admin\AuditController::class, 'show'])->name('audit.show');
     Route::post('audit/alerts/{alert}/resolve',                   [Admin\AuditController::class, 'resolveAlert'])->name('audit.alerts.resolve');
+
+    // Campañas de Email
+    Route::get('email-campaigns',                                       [Admin\EmailCampaignController::class, 'index'])->name('email-campaigns.index');
+    Route::get('email-campaigns/create',                                [Admin\EmailCampaignController::class, 'create'])->name('email-campaigns.create');
+    Route::post('email-campaigns',                                      [Admin\EmailCampaignController::class, 'store'])->name('email-campaigns.store');
+    Route::get('email-campaigns/{emailCampaign}',                       [Admin\EmailCampaignController::class, 'show'])->name('email-campaigns.show');
+    Route::post('email-campaigns/{emailCampaign}/send',                 [Admin\EmailCampaignController::class, 'send'])->name('email-campaigns.send');
+    Route::post('email-campaigns/{emailCampaign}/cancel',               [Admin\EmailCampaignController::class, 'cancel'])->name('email-campaigns.cancel');
+    Route::post('email-campaigns/{emailCampaign}/retry',                [Admin\EmailCampaignController::class, 'retry'])->name('email-campaigns.retry');
+    Route::post('email-campaigns/{emailCampaign}/process-pending',      [Admin\EmailCampaignController::class, 'processPending'])->name('email-campaigns.process-pending');
+    Route::post('email-campaigns/{emailCampaign}/sync-recipients',      [Admin\EmailCampaignController::class, 'syncRecipients'])->name('email-campaigns.sync-recipients');
+    Route::post('email-campaigns/{emailCampaign}/link-batch',           [Admin\EmailCampaignController::class, 'linkBatch'])->name('email-campaigns.link-batch');
 
     // Manual de usuario
     Route::get('manual', [Admin\ManualController::class, 'index'])->name('manual');

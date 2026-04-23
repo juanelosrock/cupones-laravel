@@ -32,6 +32,9 @@
                 <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1 px-2">Legal</p>
                 <a href="#legal" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">GET /legal/{type}</a>
                 <div class="border-t border-gray-100 my-2"></div>
+                <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1 px-2">Notificaciones</p>
+                <a href="#notify-send" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">POST /notify/send</a>
+                <div class="border-t border-gray-100 my-2"></div>
                 <a href="#health" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">GET /health</a>
                 <div class="border-t border-gray-100 my-2"></div>
                 <a href="#changelog" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">Changelog</a>
@@ -480,6 +483,76 @@ GET {{ $baseUrl }}/customers/1023456789</pre>
   "content": "...",
   "published_at": "2026-01-01T00:00:00Z",
   "meta": { "request_id": "...", "processed_at": "..." }
+}</pre>
+            </div>
+        </div>
+
+        {{-- Notify --}}
+        <div class="bg-white rounded-xl shadow-sm p-6" id="notify-send">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 font-mono font-bold rounded">POST</span>
+                <code class="text-base font-mono text-gray-900">/notify/send</code>
+                <span class="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-medium">20 req/min</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Envía simultáneamente un <strong>SMS</strong> y un <strong>email HTML</strong> a un destinatario. Ambos envíos se realizan de forma síncrona y se registran en el log de notificaciones. Retorna siempre <code class="bg-gray-100 px-1 rounded text-xs">200</code> — verificar <code class="bg-gray-100 px-1 rounded text-xs">sms.status</code> y <code class="bg-gray-100 px-1 rounded text-xs">email.status</code> para confirmar el resultado de cada canal.</p>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-100 mb-4">
+                <table class="w-full text-xs">
+                    <thead><tr class="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500 border-b">
+                        <th class="px-4 py-2 text-left">Campo</th><th class="px-4 py-2 text-left">Tipo</th><th class="px-4 py-2 text-left">Requerido</th><th class="px-4 py-2 text-left">Descripción</th>
+                    </tr></thead>
+                    <tbody class="divide-y divide-gray-50 text-gray-700">
+                        <tr><td class="px-4 py-2 font-mono">phone</td><td class="px-4 py-2">string</td><td class="px-4 py-2 text-green-700 font-medium">Sí</td><td class="px-4 py-2">Número celular del destinatario (ej: 3001234567)</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">email</td><td class="px-4 py-2">string</td><td class="px-4 py-2 text-green-700 font-medium">Sí</td><td class="px-4 py-2">Correo electrónico válido del destinatario</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">sms_text</td><td class="px-4 py-2">string</td><td class="px-4 py-2 text-green-700 font-medium">Sí</td><td class="px-4 py-2">Texto del SMS — máximo 160 caracteres</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">email_subject</td><td class="px-4 py-2">string</td><td class="px-4 py-2 text-green-700 font-medium">Sí</td><td class="px-4 py-2">Asunto del correo — máximo 255 caracteres</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">email_template</td><td class="px-4 py-2">string</td><td class="px-4 py-2 text-green-700 font-medium">Sí</td><td class="px-4 py-2">Cuerpo del email en formato HTML5</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bg-gray-900 rounded-lg p-4 text-xs font-mono text-gray-100 overflow-x-auto mb-4">
+<pre>// Request
+POST /api/v1/notify/send
+Content-Type: application/json
+X-Client-Id: ch_demo_client
+X-Client-Secret: ...
+
+{
+  "phone": "3001234567",
+  "email": "cliente@ejemplo.com",
+  "sms_text": "Hola, tu descuento exclusivo te espera. Revisa tu correo.",
+  "email_subject": "Tu descuento exclusivo 🎁",
+  "email_template": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Hola!&lt;/h1&gt;&lt;p&gt;Tu código: PROMO25&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"
+}</pre>
+            </div>
+
+            <div class="bg-gray-900 rounded-lg p-4 text-xs font-mono text-gray-100 overflow-x-auto">
+<pre>// Respuesta exitosa
+{
+  "success": true,
+  "sms": {
+    "status": "sent",
+    "message_id": "abc123xyz",
+    "error": null
+  },
+  "email": {
+    "status": "sent",
+    "message_id": "def456uvw",
+    "error": null
+  },
+  "meta": {
+    "request_id": "uuid",
+    "processed_at": "2026-04-23T10:00:00Z"
+  }
+}
+
+// Respuesta con fallo parcial (el SMS falló, el email se envió)
+{
+  "success": false,
+  "sms": { "status": "failed", "message_id": null, "error": "Zenvia error 400: ..." },
+  "email": { "status": "sent", "message_id": "def456uvw", "error": null },
+  "meta": { ... }
 }</pre>
             </div>
         </div>

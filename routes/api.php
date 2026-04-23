@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\CouponController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\LegalController;
+use App\Http\Controllers\Api\V1\NotifyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,6 +51,13 @@ Route::prefix('v1')->name('api.v1.')->middleware(['api.auth'])->group(function (
     Route::get('legal/{type}', [LegalController::class, 'show'])
         ->name('legal.show')
         ->withoutMiddleware(['api.auth']); // Público
+
+    // ── Notificaciones (SMS + Email simultáneo) ──────────────────
+    Route::prefix('notify')->name('notify.')->group(function () {
+        Route::post('send', [NotifyController::class, 'send'])
+            ->name('send')
+            ->middleware('throttle:20,1');
+    });
 });
 
 // Health check (sin auth)

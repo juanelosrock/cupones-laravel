@@ -35,6 +35,14 @@ return [
         ],
     ],
 
+    'email' => [
+        'driver'               => env('EMAIL_DRIVER', 'log'),
+        // Zenvia
+        'zenvia_token'         => env('EMAIL_ZENVIA_TOKEN'),
+        'zenvia_from_name'     => env('EMAIL_ZENVIA_FROM_NAME', 'CuponesHub'),
+        'zenvia_from_address'  => env('EMAIL_ZENVIA_FROM_ADDRESS'),
+    ],
+
     'sms' => [
         'driver'            => env('SMS_DRIVER', 'log'),
         'from'              => env('SMS_FROM', 'CuponesHub'),
