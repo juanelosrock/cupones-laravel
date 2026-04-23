@@ -32,7 +32,23 @@
       "Bash(php -l resources/views/admin/manual/index.blade.php)",
       "Bash(php -r 'require '\\\\''vendor/autoload.php'\\\\''; $app = require '\\\\''bootstrap/app.php'\\\\''; echo '\\\\''OK'\\\\'';')",
       "Bash(gh auth:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(php -r ' *)",
+      "Bash(php -l app/Http/Controllers/Admin/SmsCampaignController.php)",
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(grep -E \"\\\\.\\(php|blade\\)$\")",
+      "Bash(xargs grep *)",
+      "Bash(php -l app/Http/Controllers/Api/V1/NotifyController.php)",
+      "Bash(curl -s -X POST http://localhost:8001/api/v1/notify/send -H 'X-Client-Id: ch_demo_client' -H 'X-Client-Secret: demo_secret_J0d3o77ZuFjxuF4RkXHIeNo95kNNfFaj' -H 'Content-Type: application/json' -d '{\"phone\":\"3001234567\",\"email\":\"test@ejemplo.com\",\"sms_text\":\"Hola, tu descuento te espera.\",\"email_subject\":\"Tu descuento 🎁\",\"email_template\":\"<html><body><h1>Hola!</h1></body></html>\"}')",
+      "Bash(git commit -m 'fix: correct Zenvia email API payload \\(from as string, type=email, body field\\) *)",
+      "Bash(git commit -m 'fix: Zenvia email content field is '\\\\''html'\\\\'' not '\\\\''body'\\\\'' for type=email *)",
+      "Bash(git commit -m 'fix: correct accept-terms default body in API Tester *)",
+      "Bash(php -l app/Services/SmsService.php)",
+      "Bash(php -l app/Services/EmailService.php)",
+      "Bash(php -l app/Http/Controllers/Admin/ProviderController.php)"
     ]
   }
 }

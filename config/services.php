@@ -36,11 +36,16 @@ return [
     ],
 
     'email' => [
-        'driver'               => env('EMAIL_DRIVER', 'log'),
+        'driver'                 => env('EMAIL_DRIVER', 'log'),
         // Zenvia
-        'zenvia_token'         => env('EMAIL_ZENVIA_TOKEN'),
-        'zenvia_from_name'     => env('EMAIL_ZENVIA_FROM_NAME', 'CuponesHub'),
-        'zenvia_from_address'  => env('EMAIL_ZENVIA_FROM_ADDRESS'),
+        'zenvia_token'           => env('EMAIL_ZENVIA_TOKEN'),
+        'zenvia_from_name'       => env('EMAIL_ZENVIA_FROM_NAME', 'CuponesHub'),
+        'zenvia_from_address'    => env('EMAIL_ZENVIA_FROM_ADDRESS'),
+        // Infobip
+        'infobip_api_key'        => env('EMAIL_INFOBIP_API_KEY'),
+        'infobip_base_url'       => env('EMAIL_INFOBIP_BASE_URL', 'https://api.infobip.com'),
+        'infobip_from_name'      => env('EMAIL_INFOBIP_FROM_NAME', 'CuponesHub'),
+        'infobip_from_address'   => env('EMAIL_INFOBIP_FROM_ADDRESS'),
     ],
 
     'sms' => [
@@ -49,6 +54,7 @@ return [
         // Infobip
         'infobip_api_key'   => env('SMS_INFOBIP_API_KEY'),
         'infobip_base_url'  => env('SMS_INFOBIP_BASE_URL', 'https://api.infobip.com'),
+        'infobip_from'      => env('SMS_INFOBIP_FROM', 'CuponesHub'),
         // Twilio
         'twilio_sid'        => env('SMS_TWILIO_SID'),
         'twilio_token'      => env('SMS_TWILIO_TOKEN'),

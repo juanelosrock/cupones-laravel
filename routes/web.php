@@ -140,6 +140,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('email-campaigns/{emailCampaign}/sync-recipients',      [Admin\EmailCampaignController::class, 'syncRecipients'])->name('email-campaigns.sync-recipients');
     Route::post('email-campaigns/{emailCampaign}/link-batch',           [Admin\EmailCampaignController::class, 'linkBatch'])->name('email-campaigns.link-batch');
 
+    // Proveedores de mensajería
+    Route::get('providers',  [Admin\ProviderController::class, 'index'])->name('providers.index');
+    Route::put('providers',  [Admin\ProviderController::class, 'update'])->name('providers.update');
+
     // Manual de usuario
     Route::get('manual', [Admin\ManualController::class, 'index'])->name('manual');
 });

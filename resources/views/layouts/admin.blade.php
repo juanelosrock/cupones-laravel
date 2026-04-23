@@ -60,6 +60,9 @@
         <a href="{{ route('admin.api-clients.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-800 {{ request()->routeIs('admin.api-clients.*') ? 'bg-blue-800' : '' }}">
             🔑 API Clients
         </a>
+        <a href="{{ route('admin.providers.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-800 {{ request()->routeIs('admin.providers.*') ? 'bg-blue-800' : '' }}">
+            🔌 Proveedores
+        </a>
         <a href="{{ route('admin.audit.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-800 {{ request()->routeIs('admin.audit.*') ? 'bg-blue-800' : '' }}">
             📋 Auditoría
         </a>
