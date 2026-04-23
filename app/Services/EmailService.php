@@ -43,13 +43,13 @@ class EmailService
             'X-API-TOKEN' => $token,
             'Content-Type' => 'application/json',
         ])->post('https://api.zenvia.com/v2/channels/email/messages', [
-            'from'     => ['name' => $fromName, 'address' => $fromEmail],
+            'from'     => $fromEmail,
             'to'       => $to,
             'contents' => [
                 [
-                    'type'    => 'html',
+                    'type'    => 'email',
                     'subject' => $subject,
-                    'html'    => $htmlBody,
+                    'body'    => $htmlBody,
                 ],
             ],
         ]);
