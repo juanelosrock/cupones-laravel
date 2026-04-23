@@ -79,21 +79,20 @@ class SmsService
             'Authorization' => "App {$apiKey}",
             'Content-Type'  => 'application/json',
             'Accept'        => 'application/json',
-        ])->post("{$baseUrl}/sms/2/text/advanced", [
+        ])->post("{$baseUrl}/sms/3/messages", [
             'messages' => [[
-                'from'         => $from,
+                'sender'       => $from,
                 'destinations' => [['to' => preg_replace('/\D/', '', $phone)]],
-                'text'         => $message,
+                'content'      => ['text' => $message],
             ]],
         ]);
 
         if ($response->successful()) {
-            $body    = $response->json();
-            $msgId   = $body['messages'][0]['messageId'] ?? null;
-            $status  = $body['messages'][0]['status']['groupName'] ?? null;
-            $success = in_array($status, ['PENDING', 'SENT', null]);
+            $body   = $response->json();
+            $msgId  = $body['messages'][0]['messageId'] ?? null;
+            $status = $body['messages'][0]['status']['groupName'] ?? null;
 
-            if ($success) {
+            if (!in_array($status, ['REJECTED', 'UNDELIVERABLE'])) {
                 return ['success' => true, 'message_id' => $msgId, 'provider_response' => $body];
             }
 

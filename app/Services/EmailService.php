@@ -81,12 +81,14 @@ class EmailService
             'Authorization' => "App {$apiKey}",
             'Content-Type'  => 'application/json',
             'Accept'        => 'application/json',
-        ])->post("{$baseUrl}/email/3/messages", [
+        ])->post("{$baseUrl}/email/4/messages", [
             'messages' => [[
-                'from'     => "{$fromName} <{$fromEmail}>",
-                'to'       => [['to' => $to]],
-                'subject'  => $subject,
-                'htmlBody' => $htmlBody,
+                'sender'       => "{$fromName} <{$fromEmail}>",
+                'destinations' => [['to' => [['destination' => $to]]]],
+                'content'      => [
+                    'subject' => $subject,
+                    'html'    => $htmlBody,
+                ],
             ]],
         ]);
 
