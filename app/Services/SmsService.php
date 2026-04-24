@@ -111,17 +111,22 @@ class SmsService
 
     private function sendLabsMobile(string $phone, string $message): array
     {
-        $username = Setting::get('sms_labsmobile_username') ?? config('services.sms.labsmobile_username');
-        $token    = Setting::get('sms_labsmobile_token')    ?? config('services.sms.labsmobile_token');
+        $username = Setting::get('sms_labsmobile_username') ?? config('services.sms.labsmobile_username', '');
+        $token    = Setting::get('sms_labsmobile_token')    ?? config('services.sms.labsmobile_token', '');
         $tpoa     = Setting::get('sms_labsmobile_tpoa')     ?? config('services.sms.labsmobile_tpoa', 'CuponesHub');
         $country  = Setting::get('sms_labsmobile_country')  ?? config('services.sms.labsmobile_country', '57');
+
+        if (empty($username) || empty($token)) {
+            Log::error('LabsMobile credentials not configured (username or token missing)');
+            return ['success' => false, 'message' => 'LabsMobile: credenciales no configuradas'];
+        }
 
         $to = preg_replace('/\D/', '', $phone);
         if (strlen($to) === 10 && str_starts_with($to, '3')) {
             $to = $country . $to;
         }
 
-        $response = Http::withBasicAuth($username, $token)
+        $response = Http::withBasicAuth((string) $username, (string) $token)
             ->withHeaders(['Content-Type' => 'application/json', 'Accept' => 'application/json'])
             ->post('https://api.labsmobile.com/json/send', [
                 'message'   => $message,
