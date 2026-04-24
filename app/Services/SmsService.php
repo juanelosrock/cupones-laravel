@@ -19,9 +19,10 @@ class SmsService
 
         try {
             return match ($driver) {
-                'zenvia'  => $this->sendZenvia($phone, $message),
-                'infobip' => $this->sendInfobip($phone, $message),
-                default   => $this->sendLog($phone, $message),
+                'zenvia'     => $this->sendZenvia($phone, $message),
+                'infobip'    => $this->sendInfobip($phone, $message),
+                'labsmobile' => $this->sendLabsMobile($phone, $message),
+                default      => $this->sendLog($phone, $message),
             };
         } catch (\Throwable $e) {
             Log::error("SMS send failed to {$phone}: " . $e->getMessage());
@@ -105,6 +106,46 @@ class SmsService
         return [
             'success' => false,
             'message' => 'Infobip error ' . $response->status() . ': ' . ($response->json('requestError.serviceException.text') ?? $response->body()),
+        ];
+    }
+
+    private function sendLabsMobile(string $phone, string $message): array
+    {
+        $username = Setting::get('sms_labsmobile_username') ?? config('services.sms.labsmobile_username');
+        $token    = Setting::get('sms_labsmobile_token')    ?? config('services.sms.labsmobile_token');
+        $tpoa     = Setting::get('sms_labsmobile_tpoa')     ?? config('services.sms.labsmobile_tpoa', 'CuponesHub');
+        $country  = Setting::get('sms_labsmobile_country')  ?? config('services.sms.labsmobile_country', '57');
+
+        $to = preg_replace('/\D/', '', $phone);
+        if (strlen($to) === 10 && str_starts_with($to, '3')) {
+            $to = $country . $to;
+        }
+
+        $response = Http::withBasicAuth($username, $token)
+            ->withHeaders(['Content-Type' => 'application/json', 'Accept' => 'application/json'])
+            ->post('https://api.labsmobile.com/json/send', [
+                'message'   => $message,
+                'tpoa'      => $tpoa,
+                'recipient' => [['msisdn' => $to]],
+            ]);
+
+        Log::info("LabsMobile response [{$response->status()}]: " . $response->body());
+
+        if ($response->successful()) {
+            $body = $response->json();
+            $code = (string) ($body['code'] ?? '1');   // normalise int/string
+            if ($code === '0') {
+                return ['success' => true, 'message_id' => $body['subid'] ?? null, 'provider_response' => $body];
+            }
+            $errMsg = $body['message'] ?? 'Error desconocido';
+            Log::warning("LabsMobile SMS failed to {$to}: {$errMsg} (code {$code})");
+            return ['success' => false, 'message' => "LabsMobile [{$code}]: {$errMsg}"];
+        }
+
+        Log::warning("LabsMobile SMS failed to {$to}: HTTP {$response->status()} — " . $response->body());
+        return [
+            'success' => false,
+            'message' => 'LabsMobile error ' . $response->status() . ': ' . $response->body(),
         ];
     }
 
