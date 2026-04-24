@@ -41,8 +41,8 @@
         {{-- Driver selector --}}
         <div class="mb-5">
             <label class="block text-xs font-medium text-gray-600 mb-2">Proveedor activo</label>
-            <div class="grid grid-cols-3 gap-3">
-                @foreach(['log' => ['label'=>'Log (dev)','icon'=>'🗒️','desc'=>'Solo registra en logs, no envía'], 'zenvia' => ['label'=>'Zenvia','icon'=>'⚡','desc'=>'Plataforma activa'], 'infobip' => ['label'=>'Infobip','icon'=>'🌐','desc'=>'Proveedor alternativo']] as $val => $opt)
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                @foreach(['log' => ['label'=>'Log (dev)','icon'=>'🗒️','desc'=>'Solo registra en logs'], 'zenvia' => ['label'=>'Zenvia','icon'=>'⚡','desc'=>'Plataforma activa'], 'infobip' => ['label'=>'Infobip','icon'=>'🌐','desc'=>'Proveedor alternativo'], 'labsmobile' => ['label'=>'LabsMobile','icon'=>'📲','desc'=>'SMS masivo']] as $val => $opt)
                     <label class="relative cursor-pointer">
                         <input type="radio" name="sms_driver" value="{{ $val }}" x-model="smsDriver" class="sr-only peer">
                         <div class="border-2 rounded-xl p-4 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 border-gray-200 hover:border-gray-300">
@@ -119,6 +119,44 @@
                     <input type="text" name="sms_infobip_from" value="{{ $settings['sms_infobip_from'] }}"
                            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 outline-none"
                            placeholder="CuponesHub">
+                </div>
+            </div>
+        </div>
+
+        {{-- LabsMobile SMS config --}}
+        <div x-show="smsDriver === 'labsmobile'" x-transition class="border border-orange-100 rounded-xl p-4 bg-orange-50/40 space-y-3">
+            <p class="text-xs font-semibold text-orange-700 uppercase tracking-wide">Configuración LabsMobile SMS</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Usuario (email)</label>
+                    <input type="text" name="sms_labsmobile_username" value="{{ $settings['sms_labsmobile_username'] }}"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300 outline-none"
+                           placeholder="tu@correo.com">
+                    <p class="text-xs text-gray-400 mt-0.5">Email de tu cuenta LabsMobile</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">
+                        Token API
+                        @if(!empty($settings['sms_labsmobile_token_set']))
+                            <span class="ml-1 text-green-600 font-normal">✓ guardado</span>
+                        @endif
+                    </label>
+                    <input type="password" name="sms_labsmobile_token"
+                           placeholder="{{ !empty($settings['sms_labsmobile_token_set']) ? '••••••••••••••••' : 'Ingresa el token' }}"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300 outline-none">
+                    <p class="text-xs text-gray-400 mt-0.5">Dejar vacío para mantener el token actual</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">TPOA (remitente)</label>
+                    <input type="text" name="sms_labsmobile_tpoa" value="{{ $settings['sms_labsmobile_tpoa'] }}"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300 outline-none"
+                           placeholder="CuponesHub">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Código de país</label>
+                    <input type="text" name="sms_labsmobile_country" value="{{ $settings['sms_labsmobile_country'] }}"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300 outline-none"
+                           placeholder="57">
                 </div>
             </div>
         </div>
