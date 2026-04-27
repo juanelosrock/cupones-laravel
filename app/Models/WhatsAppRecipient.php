@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class WhatsAppRecipient extends Model
 {
     public $timestamps  = false;
+    protected $table    = 'whatsapp_recipients';
     protected $fillable = [
         'whatsapp_campaign_id', 'customer_id', 'phone',
         'assigned_coupon_code', 'status', 'message_sent',

@@ -8,6 +8,7 @@ class WhatsAppCampaign extends Model
 {
     use SoftDeletes;
 
+    protected $table    = 'whatsapp_campaigns';
     protected $fillable = [
         'name', 'campaign_id', 'coupon_batch_id',
         'message_template', 'filters',
