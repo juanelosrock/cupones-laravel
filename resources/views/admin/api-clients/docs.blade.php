@@ -31,6 +31,8 @@
                 <div class="border-t border-gray-100 my-2"></div>
                 <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1 px-2">Legal</p>
                 <a href="#legal" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">GET /legal/{type}</a>
+                <a href="#legal-versions" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">GET /legal/{type}/versions</a>
+                <a href="#legal-version" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">GET /legal/{type}/versions/{v}</a>
                 <div class="border-t border-gray-100 my-2"></div>
                 <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1 px-2">Notificaciones</p>
                 <a href="#notify-send" class="block py-1 px-2 rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">POST /notify/send</a>
@@ -226,24 +228,43 @@
 <pre>{
   "valid": true,
   "code": "PROMO25",
-  "discount_type": "percentage",   // "percentage" | "fixed"
-  "discount_value": 25.00,          // porcentaje o monto fijo
-  "discount_amount": 12500.00,      // COP descontado
-  "original_amount": 50000.00,
-  "final_amount": 37500.00,
-  "message": "Cupón válido. Se aplicará un descuento del 25%.",
+  "discount_type": "percentage",          // "percentage" | "fixed"
+  "discount_value": 50.00,                // valor original configurado en el lote
+  "effective_discount_value": 40.00,      // porcentaje real aplicado (puede ser menor si hay tope)
+  "discount_capped": true,                // true cuando se aplicó el tope máximo de descuento
+  "max_discount_amount": 40000.00,        // tope en COP (null si no tiene límite)
+  "discount_amount": 40000.00,            // COP descontados (ya con el tope aplicado)
+  "original_amount": 100000.00,
+  "final_amount": 60000.00,
+  "message": "Cupón válido. Descuento máximo aplicado: $40.000.",
   "coupon": {
     "starts_at": "2026-01-01",
     "expires_at": "2026-12-31",
     "min_purchase": 20000,
     "max_purchase": null,
-    "uses_remaining": 48,           // null si ilimitado
-    "applicable_to": "all"          // "all" | "products" | "categories"
+    "uses_remaining": 48,                 // null si ilimitado
+    "applicable_to": "all"               // "all" | "products" | "categories"
   },
   "meta": {
     "request_id": "uuid-v4",
     "processed_at": "2026-04-12T10:00:00Z"
   }
+}
+
+// Caso sin tope (discount_capped: false)
+{
+  "valid": true,
+  "code": "PROMO25",
+  "discount_type": "percentage",
+  "discount_value": 50.00,
+  "effective_discount_value": 50.00,
+  "discount_capped": false,
+  "max_discount_amount": 40000.00,
+  "discount_amount": 25000.00,
+  "original_amount": 50000.00,
+  "final_amount": 25000.00,
+  "message": "Cupón válido.",
+  ...
 }</pre>
             </div>
 
@@ -299,12 +320,16 @@
 <pre>{
   "redeemed": true,
   "redemption_id": 1234,
+  "valid": true,
   "code": "PROMO25",
   "discount_type": "percentage",
-  "discount_value": 25.00,
-  "discount_amount": 12500.00,
-  "original_amount": 50000.00,
-  "final_amount": 37500.00,
+  "discount_value": 50.00,               // valor original del lote
+  "effective_discount_value": 40.00,     // porcentaje real aplicado
+  "discount_capped": true,               // true si se aplicó tope
+  "max_discount_amount": 40000.00,       // null si no tiene tope
+  "discount_amount": 40000.00,
+  "original_amount": 100000.00,
+  "final_amount": 60000.00,
   "message": "Cupón redimido exitosamente.",
   "meta": { "request_id": "uuid-v4", "processed_at": "..." }
 }</pre>
@@ -326,7 +351,8 @@
   "code": "PROMO25",
   "type": "unique",               // "unique" | "general"
   "discount_type": "percentage",
-  "discount_value": 25.00,
+  "discount_value": 50.00,
+  "max_discount_amount": 40000.00,   // null si no tiene tope de descuento
   "min_purchase": 20000,
   "max_purchase": null,
   "starts_at": "2026-01-01",
@@ -460,7 +486,7 @@ GET {{ $baseUrl }}/customers/1023456789</pre>
                 <code class="text-base font-mono text-gray-900">/legal/{type}</code>
                 <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-medium">Público — sin auth</span>
             </div>
-            <p class="text-sm text-gray-600 mb-4">Retorna el documento legal vigente del tipo especificado. No requiere autenticación.</p>
+            <p class="text-sm text-gray-600 mb-4">Retorna el documento legal <strong>vigente</strong> (activo) del tipo especificado. No requiere autenticación.</p>
 
             <div class="overflow-x-auto rounded-lg border border-gray-100 mb-4">
                 <table class="w-full text-xs">
@@ -470,17 +496,68 @@ GET {{ $baseUrl }}/customers/1023456789</pre>
                     <tbody class="divide-y divide-gray-50">
                         <tr><td class="px-4 py-2 font-mono">terms</td><td class="px-4 py-2 text-gray-600">Términos y condiciones</td></tr>
                         <tr><td class="px-4 py-2 font-mono">privacy</td><td class="px-4 py-2 text-gray-600">Política de privacidad y tratamiento de datos (Ley 1581)</td></tr>
-                        <tr><td class="px-4 py-2 font-mono">sms_consent</td><td class="px-4 py-2 text-gray-600">Consentimiento para envío de SMS</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">sms_consent</td><td class="px-4 py-2 text-gray-600">Consentimiento para envío de SMS comerciales</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">commercial</td><td class="px-4 py-2 text-gray-600">Autorización de comunicaciones comerciales (WhatsApp, email, push)</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="bg-gray-900 rounded-lg p-4 text-xs font-mono text-gray-100 overflow-x-auto">
 <pre>{
-  "type": "privacy",
-  "version": "1.0",
-  "title": "Política de Privacidad",
+  "type": "commercial",
+  "version": "2.0",
+  "title": "Autorización de Comunicaciones Comerciales",
   "content": "...",
+  "is_active": true,
+  "published_at": "2026-04-01T00:00:00Z",
+  "meta": { "request_id": "...", "processed_at": "..." }
+}</pre>
+            </div>
+        </div>
+
+        {{-- GET /legal/{type}/versions --}}
+        <div class="bg-white rounded-xl shadow-sm p-6" id="legal-versions">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-xs px-2 py-1 bg-green-100 text-green-700 font-mono font-bold rounded">GET</span>
+                <code class="text-base font-mono text-gray-900">/legal/{type}/versions</code>
+                <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-medium">Público — sin auth</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Lista el historial de todas las versiones publicadas de un documento legal, ordenadas de más reciente a más antigua. Útil para mostrar el historial de cambios o verificar qué versión aceptó un cliente.</p>
+
+            <div class="bg-gray-900 rounded-lg p-4 text-xs font-mono text-gray-100 overflow-x-auto">
+<pre>{
+  "type": "commercial",
+  "total": 3,
+  "versions": [
+    { "id": 5, "version": "2.0", "title": "...", "is_active": true,  "published_at": "2026-04-01T..." },
+    { "id": 3, "version": "1.1", "title": "...", "is_active": false, "published_at": "2026-02-01T..." },
+    { "id": 1, "version": "1.0", "title": "...", "is_active": false, "published_at": "2026-01-01T..." }
+  ],
+  "meta": { "request_id": "...", "processed_at": "..." }
+}</pre>
+            </div>
+        </div>
+
+        {{-- GET /legal/{type}/versions/{version} --}}
+        <div class="bg-white rounded-xl shadow-sm p-6" id="legal-version">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-xs px-2 py-1 bg-green-100 text-green-700 font-mono font-bold rounded">GET</span>
+                <code class="text-base font-mono text-gray-900">/legal/{type}/versions/{version}</code>
+                <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-medium">Público — sin auth</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Retorna el contenido completo de una versión específica de un documento legal. Permite auditar exactamente qué texto aceptó un cliente en un momento dado.</p>
+
+            <div class="bg-gray-900 rounded-lg p-4 text-xs font-mono text-gray-100 overflow-x-auto mb-4">
+<pre>GET /api/v1/legal/commercial/versions/1.0</pre>
+            </div>
+
+            <div class="bg-gray-900 rounded-lg p-4 text-xs font-mono text-gray-100 overflow-x-auto">
+<pre>{
+  "type": "commercial",
+  "version": "1.0",
+  "title": "Autorización de Comunicaciones Comerciales",
+  "content": "...",
+  "is_active": false,
   "published_at": "2026-01-01T00:00:00Z",
   "meta": { "request_id": "...", "processed_at": "..." }
 }</pre>

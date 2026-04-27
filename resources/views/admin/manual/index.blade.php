@@ -250,6 +250,14 @@
                     <tbody class="divide-y divide-gray-50">
                         <tr><td class="px-4 py-2 font-medium">Compra mínima</td><td class="px-4 py-2 text-gray-600">El cliente debe comprar al menos este monto para que aplique el cupón</td></tr>
                         <tr><td class="px-4 py-2 font-medium">Compra máxima</td><td class="px-4 py-2 text-gray-600">El cupón no aplica si la compra supera este monto (opcional)</td></tr>
+                        <tr>
+                            <td class="px-4 py-2 font-medium">Descuento máximo</td>
+                            <td class="px-4 py-2 text-gray-600">
+                                Tope en $ al descuento calculado. Solo aplica a cupones de porcentaje.<br>
+                                <span class="text-gray-400">Ejemplo: 50% de descuento con tope de $40.000. Para un pedido de $100.000 el descuento calculado sería $50.000, pero el sistema lo limita a $40.000 (40% efectivo). El cliente paga $60.000.
+                                La API devuelve <code class="bg-gray-100 px-1 rounded">discount_capped: true</code> y <code class="bg-gray-100 px-1 rounded">effective_discount_value: 40</code> para que el POS pueda informar al cliente.</span>
+                            </td>
+                        </tr>
                         <tr><td class="px-4 py-2 font-medium">Usos totales</td><td class="px-4 py-2 text-gray-600">Cuántas veces en total se puede usar el lote entre todos los clientes</td></tr>
                         <tr><td class="px-4 py-2 font-medium">Usos por cliente</td><td class="px-4 py-2 text-gray-600">Cuántas veces puede usar el mismo cupón un mismo cliente</td></tr>
                         <tr><td class="px-4 py-2 font-medium">Usos por día</td><td class="px-4 py-2 text-gray-600">Límite diario de redenciones en todo el lote</td></tr>
