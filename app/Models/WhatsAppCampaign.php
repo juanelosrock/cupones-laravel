@@ -28,6 +28,6 @@ class WhatsAppCampaign extends Model
 
     public function campaign()    { return $this->belongsTo(Campaign::class); }
     public function couponBatch() { return $this->belongsTo(CouponBatch::class); }
-    public function recipients()  { return $this->hasMany(WhatsAppRecipient::class); }
+    public function recipients()  { return $this->hasMany(WhatsAppRecipient::class, 'whatsapp_campaign_id'); }
     public function createdBy()   { return $this->belongsTo(User::class, 'created_by_user_id'); }
 }
