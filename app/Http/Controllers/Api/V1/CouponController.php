@@ -111,37 +111,39 @@ class CouponController extends Controller
                 ], 404);
             }
             return response()->json([
-                'code'          => $code,
-                'type'          => 'general',
-                'discount_type' => $batch->discount_type,
-                'discount_value'=> (float) $batch->discount_value,
-                'starts_at'     => $batch->start_date->toDateString(),
-                'expires_at'    => $batch->end_date->toDateString(),
-                'min_purchase'  => (float) $batch->min_purchase_amount,
-                'max_purchase'  => $batch->max_purchase_amount ? (float) $batch->max_purchase_amount : null,
-                'status'        => $batch->status,
-                'uses_remaining'=> $batch->max_uses_total
+                'code'                => $code,
+                'type'                => 'general',
+                'discount_type'       => $batch->discount_type,
+                'discount_value'      => (float) $batch->discount_value,
+                'max_discount_amount' => $batch->max_discount_amount ? (float) $batch->max_discount_amount : null,
+                'starts_at'           => $batch->start_date->toDateString(),
+                'expires_at'          => $batch->end_date->toDateString(),
+                'min_purchase'        => (float) $batch->min_purchase_amount,
+                'max_purchase'        => $batch->max_purchase_amount ? (float) $batch->max_purchase_amount : null,
+                'status'              => $batch->status,
+                'uses_remaining'      => $batch->max_uses_total
                     ? $batch->max_uses_total - \App\Models\CouponRedemption::whereHas('coupon', fn($q) => $q->where('batch_id', $batch->id))->count()
                     : null,
-                'applicable_to' => $batch->applicable_to,
-                'meta'          => ['request_id' => (string) Str::uuid(), 'processed_at' => now()->toIso8601String()],
+                'applicable_to'       => $batch->applicable_to,
+                'meta'                => ['request_id' => (string) Str::uuid(), 'processed_at' => now()->toIso8601String()],
             ]);
         }
 
         $batch = $coupon->batch;
         return response()->json([
-            'code'          => $coupon->code,
-            'type'          => 'unique',
-            'status'        => $coupon->status,
-            'discount_type' => $batch->discount_type,
-            'discount_value'=> (float) $batch->discount_value,
-            'starts_at'     => $batch->start_date->toDateString(),
-            'expires_at'    => $batch->end_date->toDateString(),
-            'min_purchase'  => (float) $batch->min_purchase_amount,
-            'max_purchase'  => $batch->max_purchase_amount ? (float) $batch->max_purchase_amount : null,
-            'is_usable'     => $coupon->isUsable(),
-            'applicable_to' => $batch->applicable_to,
-            'meta'          => ['request_id' => (string) Str::uuid(), 'processed_at' => now()->toIso8601String()],
+            'code'                => $coupon->code,
+            'type'                => 'unique',
+            'status'              => $coupon->status,
+            'discount_type'       => $batch->discount_type,
+            'discount_value'      => (float) $batch->discount_value,
+            'max_discount_amount' => $batch->max_discount_amount ? (float) $batch->max_discount_amount : null,
+            'starts_at'           => $batch->start_date->toDateString(),
+            'expires_at'          => $batch->end_date->toDateString(),
+            'min_purchase'        => (float) $batch->min_purchase_amount,
+            'max_purchase'        => $batch->max_purchase_amount ? (float) $batch->max_purchase_amount : null,
+            'is_usable'           => $coupon->isUsable(),
+            'applicable_to'       => $batch->applicable_to,
+            'meta'                => ['request_id' => (string) Str::uuid(), 'processed_at' => now()->toIso8601String()],
         ]);
     }
 
