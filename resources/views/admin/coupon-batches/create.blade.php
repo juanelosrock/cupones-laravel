@@ -132,6 +132,12 @@
                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descuento máximo (opcional)</label>
+                    <input type="number" name="max_discount_amount" value="{{ old('max_discount_amount') }}" min="0" step="100"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Sin tope">
+                    <p class="text-xs text-gray-400 mt-0.5">Límite en $ al descuento calculado. Aplica sólo a descuentos por porcentaje.</p>
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Máx. usos totales</label>
                     <input type="number" name="max_uses_total" value="{{ old('max_uses_total') }}" min="1"
                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Sin límite">

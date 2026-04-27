@@ -83,8 +83,14 @@ class CouponService
             }
         }
 
-        $discountAmount = $this->calculateDiscount($batch, $amount);
+        [$discountAmount, $discountCapped] = $this->calculateDiscount($batch, $amount);
         $finalAmount = max(0, $amount - $discountAmount);
+
+        // Effective discount_value: recalculate percentage from capped amount so the caller
+        // always knows the real rate that was applied (e.g. 40% instead of 50% when capped).
+        $effectiveValue = $batch->discount_type === 'percentage' && $amount > 0
+            ? round(($discountAmount / $amount) * 100, 4)
+            : (float) $batch->discount_value;
 
         $usesRemaining = null;
         if ($batch->max_uses_total) {
@@ -92,24 +98,33 @@ class CouponService
             $usesRemaining = $batch->max_uses_total - $used;
         }
 
+        $message = 'Cupón válido.';
+        if ($discountCapped) {
+            $cap = number_format((float) $batch->max_discount_amount, 0, ',', '.');
+            $message = "Cupón válido. Descuento máximo aplicado: \${$cap}.";
+        }
+
         return [
-            'valid' => true,
-            'code' => $coupon->code,
-            'discount_type' => $batch->discount_type,
-            'discount_value' => (float) $batch->discount_value,
+            'valid'           => true,
+            'code'            => $coupon->code,
+            'discount_type'   => $batch->discount_type,
+            'discount_value'  => (float) $batch->discount_value,
+            'effective_discount_value' => $effectiveValue,
+            'discount_capped' => $discountCapped,
+            'max_discount_amount' => $batch->max_discount_amount ? (float) $batch->max_discount_amount : null,
             'discount_amount' => round($discountAmount, 2),
             'original_amount' => round($amount, 2),
-            'final_amount' => round($finalAmount, 2),
-            'message' => 'Cupón válido.',
+            'final_amount'    => round($finalAmount, 2),
+            'message'         => $message,
             'coupon' => [
-                'id' => $coupon->id,
-                'batch_id' => $batch->id,
-                'batch_name' => $batch->name,
-                'starts_at' => $batch->start_date->toDateString(),
-                'expires_at' => $batch->end_date->toDateString(),
-                'min_purchase' => (float) $batch->min_purchase_amount,
-                'max_purchase' => $batch->max_purchase_amount ? (float) $batch->max_purchase_amount : null,
-                'uses_remaining' => $usesRemaining,
+                'id'            => $coupon->id,
+                'batch_id'      => $batch->id,
+                'batch_name'    => $batch->name,
+                'starts_at'     => $batch->start_date->toDateString(),
+                'expires_at'    => $batch->end_date->toDateString(),
+                'min_purchase'  => (float) $batch->min_purchase_amount,
+                'max_purchase'  => $batch->max_purchase_amount ? (float) $batch->max_purchase_amount : null,
+                'uses_remaining'=> $usesRemaining,
                 'applicable_to' => $batch->applicable_to,
                 'is_combinable' => $batch->is_combinable,
             ],
@@ -141,7 +156,7 @@ class CouponService
             }
 
             $batch = $coupon->batch;
-            $discountAmount = $this->calculateDiscount($batch, $amount);
+            [$discountAmount] = $this->calculateDiscount($batch, $amount);
             $finalAmount = max(0, $amount - $discountAmount);
 
             // Registrar redención
@@ -253,12 +268,20 @@ class CouponService
         );
     }
 
-    private function calculateDiscount(CouponBatch $batch, float $amount): float
+    /** @return array{float, bool} [discountAmount, wasCapped] */
+    private function calculateDiscount(CouponBatch $batch, float $amount): array
     {
-        if ($batch->discount_type === 'percentage') {
-            return $amount * ($batch->discount_value / 100);
+        $discount = $batch->discount_type === 'percentage'
+            ? $amount * ((float) $batch->discount_value / 100)
+            : min((float) $batch->discount_value, $amount);
+
+        $cap = $batch->max_discount_amount ? (float) $batch->max_discount_amount : null;
+
+        if ($cap !== null && $discount > $cap) {
+            return [$cap, true];
         }
-        return min((float) $batch->discount_value, $amount);
+
+        return [$discount, false];
     }
 
     private function generateCode(?string $prefix = null): string

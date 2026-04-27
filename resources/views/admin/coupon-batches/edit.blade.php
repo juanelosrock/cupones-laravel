@@ -133,6 +133,13 @@
                                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descuento máximo (COP)</label>
+                        <input type="number" name="max_discount_amount" value="{{ old('max_discount_amount', $couponBatch->max_discount_amount) }}"
+                               min="0" step="100" placeholder="Sin tope"
+                               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-400 mt-0.5">Límite en $ al descuento calculado. Aplica sólo a porcentaje.</p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Máx. usos totales</label>
                         <input type="number" name="max_uses_total" value="{{ old('max_uses_total', $couponBatch->max_uses_total) }}"
                                min="1" placeholder="Sin límite"

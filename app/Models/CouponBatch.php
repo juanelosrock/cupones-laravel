@@ -11,7 +11,7 @@ class CouponBatch extends Model
     protected $fillable = [
         'campaign_id', 'name', 'description', 'code_type', 'general_code',
         'prefix', 'quantity', 'discount_type', 'discount_value',
-        'min_purchase_amount', 'max_purchase_amount',
+        'min_purchase_amount', 'max_purchase_amount', 'max_discount_amount',
         'max_uses_total', 'max_uses_per_user', 'max_uses_per_day',
         'start_date', 'end_date', 'is_combinable', 'applicable_to',
         'status', 'created_by_user_id',
@@ -23,8 +23,9 @@ class CouponBatch extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'discount_value' => 'decimal:2',
-            'min_purchase_amount' => 'decimal:2',
-            'max_purchase_amount' => 'decimal:2',
+            'min_purchase_amount'  => 'decimal:2',
+            'max_purchase_amount'  => 'decimal:2',
+            'max_discount_amount'  => 'decimal:2',
             'is_combinable' => 'boolean',
         ];
     }
