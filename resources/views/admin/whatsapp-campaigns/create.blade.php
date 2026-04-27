@@ -159,7 +159,7 @@
                 <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-xs text-green-800 space-y-1">
                     <p class="font-semibold">¿Cómo funciona una plantilla Zenvia?</p>
                     <ol class="list-decimal list-inside space-y-1 text-green-700">
-                        <li>Registra y aprueba tu plantilla en el panel de Zenvia (con variables como <code class="bg-green-100 px-0.5 rounded">{{"{{"}}1{{"}}"}}</code>, <code class="bg-green-100 px-0.5 rounded">{{"{{"}}2{{"}}"}}</code> o nombres personalizados)</li>
+                        <li>Registra y aprueba tu plantilla en el panel de Zenvia (con variables como <code class="bg-green-100 px-0.5 rounded">@{{1}}</code>, <code class="bg-green-100 px-0.5 rounded">@{{2}}</code> o nombres personalizados)</li>
                         <li>Copia el <strong>Template ID</strong> (UUID) desde Zenvia</li>
                         <li>Define aquí el valor de cada variable usando <code class="bg-green-100 px-0.5 rounded">{name}</code>, <code class="bg-green-100 px-0.5 rounded">{code}</code>, <code class="bg-green-100 px-0.5 rounded">{discount}</code></li>
                     </ol>
