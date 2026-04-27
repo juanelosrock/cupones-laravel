@@ -48,9 +48,11 @@ Route::prefix('v1')->name('api.v1.')->middleware(['api.auth'])->group(function (
     });
 
     // ── Documentos Legales ───────────────────────────────────────
-    Route::get('legal/{type}', [LegalController::class, 'show'])
-        ->name('legal.show')
-        ->withoutMiddleware(['api.auth']); // Público
+    Route::prefix('legal')->name('legal.')->withoutMiddleware(['api.auth'])->group(function () {
+        Route::get('{type}',                 [LegalController::class, 'show'])    ->name('show');
+        Route::get('{type}/versions',        [LegalController::class, 'history']) ->name('history');
+        Route::get('{type}/versions/{version}', [LegalController::class, 'version'])->name('version');
+    });
 
     // ── Notificaciones (SMS + Email simultáneo) ──────────────────
     Route::prefix('notify')->name('notify.')->group(function () {
