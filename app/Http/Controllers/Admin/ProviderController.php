@@ -14,6 +14,7 @@ class ProviderController extends Controller
         'sms_labsmobile_token',
         'email_zenvia_token',
         'email_infobip_api_key',
+        'whatsapp_zenvia_token',
     ];
 
     public function index()
@@ -25,6 +26,7 @@ class ProviderController extends Controller
             'sms_labsmobile_username', 'sms_labsmobile_token', 'sms_labsmobile_tpoa', 'sms_labsmobile_country',
             'email_driver', 'email_zenvia_token', 'email_zenvia_from_name', 'email_zenvia_from_address',
             'email_infobip_api_key', 'email_infobip_base_url', 'email_infobip_from_name', 'email_infobip_from_address',
+            'whatsapp_driver', 'whatsapp_zenvia_token', 'whatsapp_zenvia_from', 'whatsapp_zenvia_country',
         ];
 
         foreach ($keys as $key) {
@@ -51,6 +53,9 @@ class ProviderController extends Controller
         $settings['email_infobip_base_url']      = $settings['email_infobip_base_url']      ?: config('services.email.infobip_base_url', 'https://api.infobip.com');
         $settings['email_infobip_from_name']     = $settings['email_infobip_from_name']     ?: config('services.email.infobip_from_name', 'CuponesHub');
         $settings['email_infobip_from_address']  = $settings['email_infobip_from_address']  ?: config('services.email.infobip_from_address', '');
+        $settings['whatsapp_driver']             = $settings['whatsapp_driver']             ?: config('services.whatsapp.driver', 'log');
+        $settings['whatsapp_zenvia_from']        = $settings['whatsapp_zenvia_from']        ?: config('services.whatsapp.zenvia_from', '');
+        $settings['whatsapp_zenvia_country']     = $settings['whatsapp_zenvia_country']     ?: config('services.whatsapp.zenvia_country', '57');
 
         return view('admin.providers.index', compact('settings'));
     }
@@ -77,6 +82,10 @@ class ProviderController extends Controller
             'email_infobip_base_url'    => 'nullable|url|max:200',
             'email_infobip_from_name'   => 'nullable|string|max:100',
             'email_infobip_from_address'=> 'nullable|email|max:150',
+            'whatsapp_driver'           => 'required|in:log,zenvia',
+            'whatsapp_zenvia_token'     => 'nullable|string|max:200',
+            'whatsapp_zenvia_from'      => 'nullable|string|max:20',
+            'whatsapp_zenvia_country'   => 'nullable|string|max:5',
         ]);
 
         $plainKeys   = array_diff(array_keys($data), $this->encryptedKeys);

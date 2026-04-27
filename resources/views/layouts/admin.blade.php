@@ -41,6 +41,9 @@
         <a href="{{ route('admin.email-campaigns.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-800 {{ request()->routeIs('admin.email-campaigns.*') ? 'bg-blue-800' : '' }}">
             📧 Campañas Email
         </a>
+        <a href="{{ route('admin.whatsapp-campaigns.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-800 {{ request()->routeIs('admin.whatsapp-campaigns.*') ? 'bg-blue-800' : '' }}">
+            💬 Campañas WhatsApp
+        </a>
         <a href="{{ route('admin.landing-configs.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-800 {{ request()->routeIs('admin.landing-configs.*') ? 'bg-blue-800' : '' }}">
             🖼️ Landing Pages
         </a>

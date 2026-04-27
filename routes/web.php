@@ -101,6 +101,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('sms-campaigns/{smsCampaign}/process-pending',            [Admin\SmsCampaignController::class, 'processPending'])->name('sms-campaigns.process-pending');
     Route::post('sms-campaigns/{smsCampaign}/link-batch',                 [Admin\SmsCampaignController::class, 'linkBatch'])->name('sms-campaigns.link-batch');
 
+    // Campañas WhatsApp
+    Route::get('whatsapp-campaigns',                                                           [Admin\WhatsAppCampaignController::class, 'index'])->name('whatsapp-campaigns.index');
+    Route::get('whatsapp-campaigns/create',                                                    [Admin\WhatsAppCampaignController::class, 'create'])->name('whatsapp-campaigns.create');
+    Route::post('whatsapp-campaigns',                                                          [Admin\WhatsAppCampaignController::class, 'store'])->name('whatsapp-campaigns.store');
+    Route::get('whatsapp-campaigns/{whatsAppCampaign}',                                        [Admin\WhatsAppCampaignController::class, 'show'])->name('whatsapp-campaigns.show');
+    Route::post('whatsapp-campaigns/{whatsAppCampaign}/send',                                  [Admin\WhatsAppCampaignController::class, 'send'])->name('whatsapp-campaigns.send');
+    Route::post('whatsapp-campaigns/{whatsAppCampaign}/cancel',                                [Admin\WhatsAppCampaignController::class, 'cancel'])->name('whatsapp-campaigns.cancel');
+    Route::post('whatsapp-campaigns/{whatsAppCampaign}/retry',                                 [Admin\WhatsAppCampaignController::class, 'retry'])->name('whatsapp-campaigns.retry');
+    Route::post('whatsapp-campaigns/{whatsAppCampaign}/recipients/{recipient}/retry',          [Admin\WhatsAppCampaignController::class, 'retryRecipient'])->name('whatsapp-campaigns.recipients.retry');
+    Route::post('whatsapp-campaigns/{whatsAppCampaign}/sync-recipients',                       [Admin\WhatsAppCampaignController::class, 'syncRecipients'])->name('whatsapp-campaigns.sync-recipients');
+    Route::post('whatsapp-campaigns/{whatsAppCampaign}/link-batch',                            [Admin\WhatsAppCampaignController::class, 'linkBatch'])->name('whatsapp-campaigns.link-batch');
+
     // API Clients — rutas fijas ANTES de {apiClient}
     Route::get('api-clients',                               [Admin\ApiClientController::class, 'index'])->name('api-clients.index');
     Route::get('api-clients/create',                        [Admin\ApiClientController::class, 'create'])->name('api-clients.create');

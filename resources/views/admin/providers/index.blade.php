@@ -26,7 +26,8 @@
 
 <form method="POST" action="{{ route('admin.providers.update') }}" x-data="{
     smsDriver: '{{ $settings['sms_driver'] }}',
-    emailDriver: '{{ $settings['email_driver'] }}'
+    emailDriver: '{{ $settings['email_driver'] }}',
+    waDriver: '{{ $settings['whatsapp_driver'] }}'
 }">
     @csrf
     @method('PUT')
@@ -269,6 +270,72 @@
         {{-- Log notice --}}
         <div x-show="emailDriver === 'log'" x-transition class="border border-gray-200 rounded-xl p-4 bg-gray-50">
             <p class="text-sm text-gray-500">En modo <strong>log</strong> los emails no se envían — solo se registran en <code class="bg-gray-100 px-1 rounded text-xs">storage/logs/laravel.log</code>. Útil para desarrollo.</p>
+        </div>
+    </div>
+
+    {{-- ══ WHATSAPP ════════════════════════════════════════════════════════════ --}}
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <div class="flex items-center gap-3 mb-5">
+            <span class="text-xl">💬</span>
+            <h2 class="text-base font-semibold text-gray-800">Proveedor de WhatsApp</h2>
+        </div>
+
+        <div class="mb-5">
+            <label class="block text-xs font-medium text-gray-600 mb-2">Proveedor activo</label>
+            <div class="grid grid-cols-2 gap-3 max-w-sm">
+                @foreach(['log' => ['label'=>'Log (dev)','icon'=>'🗒️','desc'=>'Solo registra en logs'], 'zenvia' => ['label'=>'Zenvia','icon'=>'⚡','desc'=>'WhatsApp Business']] as $val => $opt)
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="whatsapp_driver" value="{{ $val }}" x-model="waDriver" class="sr-only peer">
+                        <div class="border-2 rounded-xl p-4 transition-all peer-checked:border-green-500 peer-checked:bg-green-50 border-gray-200 hover:border-gray-300">
+                            <div class="text-xl mb-1">{{ $opt['icon'] }}</div>
+                            <p class="text-sm font-semibold text-gray-800">{{ $opt['label'] }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">{{ $opt['desc'] }}</p>
+                        </div>
+                        <span class="absolute top-2 right-2 hidden peer-checked:block">
+                            <span class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Zenvia WhatsApp config --}}
+        <div x-show="waDriver === 'zenvia'" x-transition class="border border-green-100 rounded-xl p-4 bg-green-50/40 space-y-3">
+            <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">Configuración Zenvia WhatsApp</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">
+                        API Token
+                        @if(!empty($settings['whatsapp_zenvia_token_set']))
+                            <span class="ml-1 text-green-600 font-normal">✓ guardado</span>
+                        @endif
+                    </label>
+                    <input type="password" name="whatsapp_zenvia_token"
+                           placeholder="{{ !empty($settings['whatsapp_zenvia_token_set']) ? '••••••••••••••••' : 'Ingresa el token Zenvia' }}"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300 outline-none">
+                    <p class="text-xs text-gray-400 mt-0.5">Mismo token que SMS Zenvia si comparten cuenta. Dejar vacío para mantener.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Número WhatsApp Business (from)</label>
+                    <input type="text" name="whatsapp_zenvia_from" value="{{ $settings['whatsapp_zenvia_from'] }}"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300 outline-none"
+                           placeholder="573001234567">
+                    <p class="text-xs text-gray-400 mt-0.5">Número registrado en Zenvia, con código de país, sin +</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Código de país (destino)</label>
+                    <input type="text" name="whatsapp_zenvia_country" value="{{ $settings['whatsapp_zenvia_country'] }}"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300 outline-none"
+                           placeholder="57">
+                </div>
+            </div>
+        </div>
+
+        {{-- Log notice --}}
+        <div x-show="waDriver === 'log'" x-transition class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+            <p class="text-sm text-gray-500">En modo <strong>log</strong> los mensajes WhatsApp no se envían — solo se registran en <code class="bg-gray-100 px-1 rounded text-xs">storage/logs/laravel.log</code>.</p>
         </div>
     </div>
 

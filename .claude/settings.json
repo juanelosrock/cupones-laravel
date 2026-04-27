@@ -48,7 +48,10 @@
       "Bash(git commit -m 'fix: correct accept-terms default body in API Tester *)",
       "Bash(php -l app/Services/SmsService.php)",
       "Bash(php -l app/Services/EmailService.php)",
-      "Bash(php -l app/Http/Controllers/Admin/ProviderController.php)"
+      "Bash(php -l app/Http/Controllers/Admin/ProviderController.php)",
+      "Bash(git commit -m 'fix: use Infobip /email/3/messages \\(JSON\\) instead of /email/3/send \\(multipart\\) *)",
+      "Bash(git commit -m 'fix: update Infobip to v3 SMS and v4 email endpoints with correct payload structure *)",
+      "WebFetch(domain:www.labsmobile.com)"
     ]
   }
 }
