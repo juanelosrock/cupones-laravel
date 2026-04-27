@@ -26,56 +26,102 @@ class ProcessWhatsAppCampaign implements ShouldQueue
     {
         $this->campaign->update(['status' => 'sending', 'started_at' => now()]);
 
-        $recipients = $this->campaign->recipients()->where('status', 'pending')->get();
-        $batch      = $this->campaign->couponBatch;
+        $recipients  = $this->campaign->recipients()->where('status', 'pending')->get();
+        $batch       = $this->campaign->couponBatch;
+        $contentType = $this->campaign->content_type ?? 'text';
+        $externalId  = 'wa-campaign-' . $this->campaign->id;
 
         foreach ($recipients as $recipient) {
             try {
-                $vars = [
-                    'name'  => $recipient->customer?->name ?? 'Cliente',
-                    'phone' => $recipient->phone,
-                ];
+                $vars = $this->buildVars($recipient, $batch);
 
-                if ($batch) {
-                    if ($batch->code_type === 'general') {
-                        $vars['code']     = $batch->general_code;
-                        $vars['discount'] = $this->formatDiscount($batch);
-                    } elseif ($batch->code_type === 'unique') {
-                        $code = $this->reserveUniqueCode($batch->id, $recipient);
-                        if ($code) {
-                            $vars['code']     = $code;
-                            $vars['discount'] = $this->formatDiscount($batch);
-                        }
-                    }
+                if ($contentType === 'template') {
+                    $result = $this->sendTemplate($whatsApp, $recipient, $vars, $externalId);
+                } else {
+                    $result = $this->sendText($whatsApp, $recipient, $vars, $externalId);
                 }
-
-                $message = $whatsApp->renderTemplate($this->campaign->message_template, $vars);
-                $result  = $whatsApp->send($recipient->phone, $message);
 
                 $recipient->update([
                     'status'            => $result['success'] ? 'sent' : 'failed',
-                    'message_sent'      => $message,
                     'sent_at'           => $result['success'] ? now() : null,
-                    'error_message'     => $result['success'] ? null : $result['message'],
-                    'provider_response' => json_encode($result),
+                    'error_message'     => $result['success'] ? null : ($result['message'] ?? null),
+                    'provider_response' => json_encode($result['provider_response'] ?? $result),
                 ]);
 
-                if ($result['success']) {
-                    $this->campaign->increment('sent_count');
-                } else {
-                    $this->campaign->increment('failed_count');
-                }
+                $result['success']
+                    ? $this->campaign->increment('sent_count')
+                    : $this->campaign->increment('failed_count');
 
                 usleep(100_000); // 100 ms entre envíos
 
             } catch (\Throwable $e) {
-                Log::error("WhatsApp campaign #{$this->campaign->id} error for recipient #{$recipient->id}: " . $e->getMessage());
+                Log::error("WhatsApp campaign #{$this->campaign->id} recipient #{$recipient->id}: " . $e->getMessage());
                 $recipient->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
                 $this->campaign->increment('failed_count');
             }
         }
 
         $this->campaign->update(['status' => 'sent', 'finished_at' => now()]);
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private function sendText(WhatsAppService $wa, WhatsAppRecipient $recipient, array $vars, string $externalId): array
+    {
+        $message = $wa->renderTemplate($this->campaign->message_template, $vars);
+        $recipient->update(['message_sent' => $message]);
+
+        return $wa->send(
+            phone:       $recipient->phone,
+            contentType: 'text',
+            text:        $message,
+            externalId:  $externalId . '-r' . $recipient->id,
+        );
+    }
+
+    private function sendTemplate(WhatsAppService $wa, WhatsAppRecipient $recipient, array $vars, string $externalId): array
+    {
+        // Render each field value through our variable system
+        $rawFields = $this->campaign->template_fields ?? [];
+        $fields    = [];
+        foreach ($rawFields as $key => $value) {
+            $fields[$key] = $wa->renderTemplate((string) $value, $vars);
+        }
+
+        $recipient->update(['message_sent' => json_encode($fields)]);
+
+        return $wa->send(
+            phone:       $recipient->phone,
+            contentType: 'template',
+            templateId:  $this->campaign->template_id,
+            fields:      $fields,
+            externalId:  $externalId . '-r' . $recipient->id,
+        );
+    }
+
+    private function buildVars(WhatsAppRecipient $recipient, ?object $batch): array
+    {
+        $vars = [
+            'name'  => $recipient->customer?->name ?? 'Cliente',
+            'phone' => $recipient->phone,
+            'code'  => '',
+            'discount' => '',
+        ];
+
+        if ($batch) {
+            if ($batch->code_type === 'general') {
+                $vars['code']     = $batch->general_code;
+                $vars['discount'] = $this->formatDiscount($batch);
+            } elseif ($batch->code_type === 'unique') {
+                $code = $this->reserveUniqueCode($batch->id, $recipient);
+                if ($code) {
+                    $vars['code']     = $code;
+                    $vars['discount'] = $this->formatDiscount($batch);
+                }
+            }
+        }
+
+        return $vars;
     }
 
     private function reserveUniqueCode(int $batchId, WhatsAppRecipient $recipient): ?string
@@ -86,8 +132,7 @@ class ProcessWhatsAppCampaign implements ShouldQueue
             }
 
             $assigned = WhatsAppRecipient::whereNotNull('assigned_coupon_code')
-                ->pluck('assigned_coupon_code')
-                ->toArray();
+                ->pluck('assigned_coupon_code')->toArray();
 
             $coupon = Coupon::where('batch_id', $batchId)
                 ->where('status', 'active')

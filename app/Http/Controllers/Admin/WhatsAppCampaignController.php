@@ -76,12 +76,29 @@ class WhatsAppCampaignController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'            => 'required|string|max:150',
-            'campaign_id'     => 'required|exists:campaigns,id',
-            'coupon_batch_id' => 'nullable|exists:coupon_batches,id',
-            'message_template'=> 'required|string|max:1000',
-            'scheduled_at'    => 'nullable|date|after:now',
+            'name'             => 'required|string|max:150',
+            'campaign_id'      => 'required|exists:campaigns,id',
+            'coupon_batch_id'  => 'nullable|exists:coupon_batches,id',
+            'content_type'     => 'required|in:text,template',
+            'message_template' => 'required_if:content_type,text|nullable|string|max:4096',
+            'template_id'      => 'required_if:content_type,template|nullable|string|max:100',
+            'template_fields'  => 'nullable|array',
+            'template_fields.*'=> 'nullable|string|max:500',
+            'scheduled_at'     => 'nullable|date|after:now',
         ]);
+
+        // Sanitise: keep only non-empty template fields
+        if (!empty($data['template_fields'])) {
+            $data['template_fields'] = array_filter($data['template_fields'], fn($v) => $v !== '' && $v !== null);
+        }
+
+        // For text mode, template_id is irrelevant and vice versa
+        if ($data['content_type'] === 'text') {
+            $data['template_id']     = null;
+            $data['template_fields'] = null;
+        } else {
+            $data['message_template'] = null;
+        }
 
         $campaign  = Campaign::findOrFail($data['campaign_id']);
         $customers = $campaign->customers()
