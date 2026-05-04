@@ -39,7 +39,7 @@ class SmsService
     private function sendZenvia(string $phone, string $message): array
     {
         $token   = Setting::get('sms_zenvia_token')   ?? config('services.sms.zenvia_token');
-        $from    = Setting::get('sms_zenvia_from')    ?? config('services.sms.zenvia_from', 'CuponesHub');
+        $from    = Setting::get('sms_zenvia_from')    ?? config('services.sms.zenvia_from', 'Promocion');
         $country = Setting::get('sms_zenvia_country') ?? config('services.sms.zenvia_country', '57');
 
         $to = preg_replace('/\D/', '', $phone);
@@ -72,7 +72,7 @@ class SmsService
     {
         $apiKey  = Setting::get('sms_infobip_api_key')  ?? config('services.sms.infobip_api_key');
         $baseUrl = Setting::get('sms_infobip_base_url') ?? config('services.sms.infobip_base_url', 'https://api.infobip.com');
-        $from    = Setting::get('sms_infobip_from')     ?? config('services.sms.from', 'CuponesHub');
+        $from    = Setting::get('sms_infobip_from')     ?? config('services.sms.from', 'Promocion');
 
         $baseUrl = rtrim($baseUrl, '/');
 
@@ -113,7 +113,7 @@ class SmsService
     {
         $username = Setting::get('sms_labsmobile_username') ?? config('services.sms.labsmobile_username', '');
         $token    = Setting::get('sms_labsmobile_token')    ?? config('services.sms.labsmobile_token', '');
-        $tpoa     = Setting::get('sms_labsmobile_tpoa')     ?? config('services.sms.labsmobile_tpoa', 'CuponesHub');
+        $tpoa     = Setting::get('sms_labsmobile_tpoa')     ?? config('services.sms.labsmobile_tpoa', 'Promocion');
         $country  = Setting::get('sms_labsmobile_country')  ?? config('services.sms.labsmobile_country', '57');
 
         if (empty($username) || empty($token)) {

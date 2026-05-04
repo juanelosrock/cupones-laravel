@@ -46,26 +46,26 @@ return [
         'driver'                 => env('EMAIL_DRIVER', 'log'),
         // Zenvia
         'zenvia_token'           => env('EMAIL_ZENVIA_TOKEN'),
-        'zenvia_from_name'       => env('EMAIL_ZENVIA_FROM_NAME', 'CuponesHub'),
+        'zenvia_from_name'       => env('EMAIL_ZENVIA_FROM_NAME', 'Promocion'),
         'zenvia_from_address'    => env('EMAIL_ZENVIA_FROM_ADDRESS'),
         // Infobip
         'infobip_api_key'        => env('EMAIL_INFOBIP_API_KEY'),
         'infobip_base_url'       => env('EMAIL_INFOBIP_BASE_URL', 'https://api.infobip.com'),
-        'infobip_from_name'      => env('EMAIL_INFOBIP_FROM_NAME', 'CuponesHub'),
+        'infobip_from_name'      => env('EMAIL_INFOBIP_FROM_NAME', 'Promocion'),
         'infobip_from_address'   => env('EMAIL_INFOBIP_FROM_ADDRESS'),
     ],
 
     'sms' => [
         'driver'            => env('SMS_DRIVER', 'log'),
-        'from'              => env('SMS_FROM', 'CuponesHub'),
+        'from'              => env('SMS_FROM', 'Promocion'),
         // Infobip
         'infobip_api_key'   => env('SMS_INFOBIP_API_KEY'),
         'infobip_base_url'  => env('SMS_INFOBIP_BASE_URL', 'https://api.infobip.com'),
-        'infobip_from'        => env('SMS_INFOBIP_FROM', 'CuponesHub'),
+        'infobip_from'        => env('SMS_INFOBIP_FROM', 'Promocion'),
         // LabsMobile
         'labsmobile_username' => env('SMS_LABSMOBILE_USERNAME'),
         'labsmobile_token'    => env('SMS_LABSMOBILE_TOKEN'),
-        'labsmobile_tpoa'     => env('SMS_LABSMOBILE_TPOA', 'CuponesHub'),
+        'labsmobile_tpoa'     => env('SMS_LABSMOBILE_TPOA', 'Promocion'),
         'labsmobile_country'  => env('SMS_LABSMOBILE_COUNTRY', '57'),
         // Twilio
         'twilio_sid'        => env('SMS_TWILIO_SID'),
@@ -73,7 +73,7 @@ return [
         'twilio_from'       => env('SMS_TWILIO_FROM'),
         // Zenvia
         'zenvia_token'      => env('SMS_ZENVIA_TOKEN'),
-        'zenvia_from'       => env('SMS_ZENVIA_FROM', 'CuponesHub'),
+        'zenvia_from'       => env('SMS_ZENVIA_FROM', 'Promocion'),
         'zenvia_country'    => env('SMS_ZENVIA_COUNTRY', '57'), // Colombia por defecto
     ],
 

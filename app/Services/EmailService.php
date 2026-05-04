@@ -73,7 +73,7 @@ class EmailService
         $fromEmail = $fromEmail
             ?? Setting::get('email_infobip_from_address') ?? config('services.email.infobip_from_address');
         $fromName  = $fromName
-            ?? Setting::get('email_infobip_from_name')    ?? config('services.email.infobip_from_name', 'CuponesHub');
+            ?? Setting::get('email_infobip_from_name')    ?? config('services.email.infobip_from_name', 'Promocion');
 
         $baseUrl = rtrim($baseUrl, '/');
 

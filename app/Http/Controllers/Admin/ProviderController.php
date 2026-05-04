@@ -42,16 +42,16 @@ class ProviderController extends Controller
 
         // Fallback to env if not set in DB
         $settings['sms_driver']                 = $settings['sms_driver']                 ?: config('services.sms.driver', 'log');
-        $settings['sms_zenvia_from']             = $settings['sms_zenvia_from']             ?: config('services.sms.zenvia_from', 'CuponesHub');
+        $settings['sms_zenvia_from']             = $settings['sms_zenvia_from']             ?: config('services.sms.zenvia_from', 'Promocion');
         $settings['sms_zenvia_country']          = $settings['sms_zenvia_country']          ?: config('services.sms.zenvia_country', '57');
         $settings['sms_infobip_base_url']        = $settings['sms_infobip_base_url']        ?: config('services.sms.infobip_base_url', 'https://api.infobip.com');
-        $settings['sms_labsmobile_tpoa']         = $settings['sms_labsmobile_tpoa']         ?: config('services.sms.labsmobile_tpoa', 'CuponesHub');
+        $settings['sms_labsmobile_tpoa']         = $settings['sms_labsmobile_tpoa']         ?: config('services.sms.labsmobile_tpoa', 'Promocion');
         $settings['sms_labsmobile_country']      = $settings['sms_labsmobile_country']      ?: config('services.sms.labsmobile_country', '57');
         $settings['email_driver']                = $settings['email_driver']                ?: config('services.email.driver', 'log');
-        $settings['email_zenvia_from_name']      = $settings['email_zenvia_from_name']      ?: config('services.email.zenvia_from_name', 'CuponesHub');
+        $settings['email_zenvia_from_name']      = $settings['email_zenvia_from_name']      ?: config('services.email.zenvia_from_name', 'Promocion');
         $settings['email_zenvia_from_address']   = $settings['email_zenvia_from_address']   ?: config('services.email.zenvia_from_address', '');
         $settings['email_infobip_base_url']      = $settings['email_infobip_base_url']      ?: config('services.email.infobip_base_url', 'https://api.infobip.com');
-        $settings['email_infobip_from_name']     = $settings['email_infobip_from_name']     ?: config('services.email.infobip_from_name', 'CuponesHub');
+        $settings['email_infobip_from_name']     = $settings['email_infobip_from_name']     ?: config('services.email.infobip_from_name', 'Promocion');
         $settings['email_infobip_from_address']  = $settings['email_infobip_from_address']  ?: config('services.email.infobip_from_address', '');
         $settings['whatsapp_driver']             = $settings['whatsapp_driver']             ?: config('services.whatsapp.driver', 'log');
         $settings['whatsapp_zenvia_from']        = $settings['whatsapp_zenvia_from']        ?: config('services.whatsapp.zenvia_from', '');

@@ -73,7 +73,7 @@ class EmailCampaignController extends Controller
         });
 
         $defaultFrom = config('services.email.zenvia_from_address', '');
-        $defaultFromName = config('services.email.zenvia_from_name', 'CuponesHub');
+        $defaultFromName = config('services.email.zenvia_from_name', 'Promocion');
 
         return view('admin.email-campaigns.create', compact('campaigns', 'campaignData', 'defaultFrom', 'defaultFromName'));
     }
