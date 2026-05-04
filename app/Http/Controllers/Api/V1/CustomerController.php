@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Department;
 use App\Models\DocumentAcceptance;
 use App\Models\LegalDocument;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -53,8 +54,22 @@ class CustomerController extends Controller
             $cityId = $this->resolveCityByName($data['city_name'], $data['department'] ?? null);
         }
 
+        // Verificar email duplicado en otro cliente antes de intentar insertar
+        if (!empty($data['email'])) {
+            $emailTaken = Customer::where('email', $data['email'])
+                ->where('phone', '!=', $data['phone'])
+                ->exists();
+            if ($emailTaken) {
+                return response()->json([
+                    'error'   => 'email_duplicado',
+                    'message' => 'El correo electrónico ya está registrado.',
+                ], 422);
+            }
+        }
+
         $wasNew = !Customer::where('phone', $data['phone'])->exists();
 
+        try {
         $customer = Customer::updateOrCreate(
             ['phone' => $data['phone']],
             [
@@ -74,6 +89,12 @@ class CustomerController extends Controller
                 'acceptance_ip'             => $request->ip(),
             ]
         );
+        } catch (UniqueConstraintViolationException) {
+            return response()->json([
+                'error'   => 'email_duplicado',
+                'message' => 'El correo electrónico ya está registrado.',
+            ], 422);
+        }
 
         // Registrar aceptaciones legales
         $docsToAccept = ['privacy', 'terms'];
