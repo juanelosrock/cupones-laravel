@@ -30,6 +30,8 @@ class CustomerController extends Controller
             ->when($request->accepted, function ($q) use ($request) {
                 $q->where('data_treatment_accepted', $request->accepted === 'yes');
             })
+            ->when($request->date_from, fn($q) => $q->whereDate('created_at', '>=', $request->date_from))
+            ->when($request->date_to,   fn($q) => $q->whereDate('created_at', '<=', $request->date_to))
             ->latest()
             ->paginate(25)->withQueryString();
 

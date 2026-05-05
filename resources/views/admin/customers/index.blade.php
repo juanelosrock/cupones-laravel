@@ -89,8 +89,18 @@
                 <option value="no"  {{ request('accepted') === 'no'  ? 'selected' : '' }}>Pendientes</option>
             </select>
         </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Desde</label>
+            <input type="date" name="date_from" value="{{ request('date_from') }}"
+                   class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Hasta</label>
+            <input type="date" name="date_to" value="{{ request('date_to') }}"
+                   class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Filtrar</button>
-        @if(request()->hasAny(['search', 'status', 'accepted']))
+        @if(request()->hasAny(['search', 'status', 'accepted', 'date_from', 'date_to']))
         <a href="{{ route('admin.customers.index') }}" class="text-gray-400 hover:text-gray-600 text-sm py-2">Limpiar</a>
         @endif
     </form>
