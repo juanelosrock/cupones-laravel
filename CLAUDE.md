@@ -343,3 +343,25 @@ routes/
 - **Ley 1581:** Toda recolección de datos de clientes requiere consentimiento explícito registrado en `document_acceptances`
 - **Race conditions:** `CouponService::redeem()` usa `DB::transaction` + `lockForUpdate()` para evitar doble redención bajo carga concurrente
 - **Jobs grandes:** Para lotes de miles de cupones o campañas SMS masivas, el job se despacha a la cola — requiere `php artisan queue:work` corriendo
+
+---
+
+## Instrucciones para Claude
+
+### Memoria del proyecto
+- El historial completo de cambios vive en `C:\Users\QimeraServer\.claude\projects\e--cupones-laravel\memory\`
+- **Cada vez que el usuario corrija código, lógica o forma de trabajo:** guardar inmediatamente en memoria antes de continuar
+  - Corrección a código → añadir en `project_changelog.md`
+  - Corrección a forma de trabajo → crear o actualizar `feedback_*.md` y puntero en `MEMORY.md`
+  - Decisión arquitectónica → añadir en `project_architecture.md`
+
+### Flujo obligatorio al terminar cada tarea
+1. Hacer `git add` de los archivos modificados
+2. Hacer `git commit` con mensaje descriptivo
+3. Hacer `git push origin main`
+4. Dar al usuario el comando `git pull` para el servidor
+5. Si hay migraciones nuevas, indicar `php artisan migrate`
+6. Si hay cambios en config, indicar `php artisan config:clear`
+
+### Manual de usuario
+- Actualizar `resources/views/admin/manual/index.blade.php` con cada cambio funcional visible al usuario — sin esperar que lo pida
