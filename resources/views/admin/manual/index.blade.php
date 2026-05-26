@@ -27,6 +27,8 @@
                 <p class="pt-2 pb-1 px-2 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Clientes</p>
                 <a href="#clientes"        class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Clientes</a>
                 <a href="#sms"             class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Campañas SMS</a>
+                <a href="#whatsapp"        class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Campañas WhatsApp</a>
+                <a href="#whatsapp-tpl"    class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Plantillas WhatsApp</a>
                 <a href="#landing-pages"  class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Landing Pages</a>
                 <p class="pt-2 pb-1 px-2 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Configuración</p>
                 <a href="#usuarios"        class="block py-1.5 px-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors">Usuarios</a>
@@ -471,6 +473,121 @@
                 <strong>Procesamiento en segundo plano:</strong> El envío masivo se procesa en cola.
                 Para que funcione, debe estar corriendo el comando <code class="bg-blue-100 px-1 rounded">php artisan queue:work</code>
                 en el servidor. Consulta al administrador técnico si los envíos no progresan.
+            </div>
+        </div>
+
+        {{-- ── CAMPAÑAS WHATSAPP ── --}}
+        <div class="bg-white rounded-xl shadow-sm p-6" id="whatsapp">
+            <h2 class="text-xl font-bold text-gray-900 mb-1">Campañas WhatsApp</h2>
+            <p class="text-sm text-gray-500 mb-4">Envío masivo de mensajes WhatsApp vía Zenvia a clientes o listas CSV</p>
+
+            <p class="text-sm text-gray-600 mb-4">
+                Las campañas WhatsApp permiten enviar mensajes masivos usando <strong>plantillas pre-aprobadas por Meta</strong> o
+                texto libre (solo para sesiones activas). El driver requiere una cuenta Zenvia configurada en
+                <strong>Proveedores</strong>.
+            </p>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Tipos de mensaje</h3>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="p-3 bg-green-50 rounded-lg border border-green-100">
+                    <p class="text-xs font-semibold text-green-800 mb-1">Template (recomendado)</p>
+                    <p class="text-xs text-green-700">Plantilla pre-aprobada por Meta. Funciona siempre, sin restricción de sesión. Requerida para envíos masivos (BIM).</p>
+                </div>
+                <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                    <p class="text-xs font-semibold text-yellow-800 mb-1">Texto libre</p>
+                    <p class="text-xs text-yellow-700">Solo funciona si el cliente envió un mensaje en las últimas 24 h (ventana de sesión activa). No válido para envíos masivos.</p>
+                </div>
+            </div>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Cómo crear una campaña WhatsApp</h3>
+            <ol class="text-sm text-gray-600 space-y-1.5 list-decimal list-inside mb-4">
+                <li>Ve a <strong>Campañas WhatsApp</strong> → <strong>Nueva Campaña WhatsApp</strong>.</li>
+                <li><strong>Destinatarios:</strong> elige "Clientes de campaña" (filtra desde el módulo de campañas) o "Subir CSV" con columnas <code class="bg-gray-100 px-1 rounded text-xs">celular</code>, <code class="bg-gray-100 px-1 rounded text-xs">nombre</code>.</li>
+                <li><strong>Cupón:</strong> vincula un lote opcional. Las variables <code class="bg-gray-100 px-1 rounded text-xs">{code}</code> y <code class="bg-gray-100 px-1 rounded text-xs">{discount}</code> se resuelven automáticamente.</li>
+                <li>Selecciona el tipo de mensaje: <strong>Template</strong> y elige la plantilla con el botón "Cargar desde Zenvia"; o <strong>Texto libre</strong>.</li>
+                <li>Programa la fecha o deja en blanco para guardar como borrador.</li>
+            </ol>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Variables disponibles</h3>
+            <div class="overflow-x-auto rounded-lg border border-gray-100 mb-4">
+                <table class="w-full text-xs">
+                    <thead><tr class="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500 border-b">
+                        <th class="px-4 py-2.5 text-left">Variable</th>
+                        <th class="px-4 py-2.5 text-left">Se reemplaza por</th>
+                    </tr></thead>
+                    <tbody class="divide-y divide-gray-50">
+                        <tr><td class="px-4 py-2 font-mono">{name}</td><td class="px-4 py-2 text-gray-600">Nombre del destinatario</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">{code}</td><td class="px-4 py-2 text-gray-600">Código de cupón asignado</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">{discount}</td><td class="px-4 py-2 text-gray-600">Valor del descuento (ej: 25% o $15.000)</td></tr>
+                        <tr><td class="px-4 py-2 font-mono">{phone}</td><td class="px-4 py-2 text-gray-600">Teléfono del destinatario</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Acciones disponibles en la campaña</h3>
+            <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside mb-4">
+                <li><strong>Enviar ahora</strong> — inicia el envío masivo en segundo plano.</li>
+                <li><strong>Cancelar</strong> — cancela una campaña en borrador o programada.</li>
+                <li><strong>Reintentar fallidos</strong> — vuelve a enviar solo los destinatarios que fallaron.</li>
+                <li><strong>Reintentar destinatario</strong> — reintento individual desde la tabla de destinatarios.</li>
+                <li><strong>Sincronizar destinatarios</strong> — actualiza la lista si hay clientes nuevos en la campaña origen.</li>
+            </ul>
+
+            <div class="p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800">
+                <strong>Procesamiento en segundo plano:</strong> El envío requiere <code class="bg-blue-100 px-1 rounded">php artisan queue:work</code> corriendo en el servidor. Hay 100 ms de pausa entre envíos para respetar los límites de Zenvia.
+            </div>
+        </div>
+
+        {{-- ── PLANTILLAS WHATSAPP ── --}}
+        <div class="bg-white rounded-xl shadow-sm p-6" id="whatsapp-tpl">
+            <h2 class="text-xl font-bold text-gray-900 mb-1">Plantillas WhatsApp</h2>
+            <p class="text-sm text-gray-500 mb-4">Gestión de plantillas registradas en Zenvia y su estado de aprobación Meta</p>
+
+            <p class="text-sm text-gray-600 mb-4">
+                Para usar el tipo <strong>Template</strong> en campañas masivas, primero debes crear una plantilla en Zenvia y esperar
+                la aprobación de Meta (normalmente 24-48 h). Accede desde <strong>Campañas WhatsApp</strong> → botón <strong>📋 Plantillas</strong>.
+            </p>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Estructura de una plantilla</h3>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <p class="text-xs font-semibold text-gray-800 mb-1">Encabezado (opcional)</p>
+                    <p class="text-xs text-gray-500">Texto (máx. 60 chars), imagen, video o documento. Solo el texto admite una variable <code class="bg-gray-100 px-0.5 rounded">@{{1}}</code>.</p>
+                </div>
+                <div class="p-3 bg-green-50 rounded-lg border border-green-100">
+                    <p class="text-xs font-semibold text-green-800 mb-1">Cuerpo (obligatorio)</p>
+                    <p class="text-xs text-green-700">Texto con variables <code class="bg-green-100 px-0.5 rounded">@{{1}}</code>, <code class="bg-green-100 px-0.5 rounded">@{{2}}</code>… Soporta *negrita*, _cursiva_, ~tachado~.</p>
+                </div>
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <p class="text-xs font-semibold text-gray-800 mb-1">Pie de página (opcional)</p>
+                    <p class="text-xs text-gray-500">Texto pequeño bajo el cuerpo. Sin variables. Máx. 60 chars.</p>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <p class="text-xs font-semibold text-blue-800 mb-1">Botones (opcional, máx. 3)</p>
+                    <p class="text-xs text-blue-700">Tipos: Respuesta rápida, URL (con variable dinámica) o Número de teléfono.</p>
+                </div>
+            </div>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Cómo crear una plantilla</h3>
+            <ol class="text-sm text-gray-600 space-y-1.5 list-decimal list-inside mb-4">
+                <li>Ve a <strong>Campañas WhatsApp</strong> → <strong>📋 Plantillas</strong> → <strong>+ Nueva Plantilla</strong>.</li>
+                <li>Escribe el nombre (solo minúsculas, números y guiones bajos, ej: <code class="bg-gray-100 px-1 rounded text-xs">promo_mayo_2026</code>).</li>
+                <li>Elige el idioma y la categoría (MARKETING, UTILITY o AUTHENTICATION).</li>
+                <li>Configura el encabezado, cuerpo (con sus ejemplos de variables), pie y botones.</li>
+                <li>La vista previa muestra el aspecto en WhatsApp y el JSON que se enviará a Zenvia.</li>
+                <li>Haz clic en <strong>Enviar a Meta para aprobación</strong>. La plantilla quedará en estado PENDING.</li>
+            </ol>
+
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Estados de aprobación</h3>
+            <div class="flex flex-wrap gap-2 text-xs mb-4">
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">⏳ PENDING — En revisión por Meta</span>
+                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full">✓ APPROVED — Lista para usar en campañas</span>
+                <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full">✗ REJECTED — Rechazada por Meta</span>
+                <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full">PAUSED — Pausada temporalmente</span>
+            </div>
+
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                <strong>Importante:</strong> Solo las plantillas con estado <strong>APPROVED</strong> pueden usarse en campañas. Si una plantilla es rechazada, corrige el contenido según las <a href="https://developers.facebook.com/docs/whatsapp/message-templates/guidelines" class="underline" target="_blank">políticas de Meta</a> y crea una nueva versión.
             </div>
         </div>
 
