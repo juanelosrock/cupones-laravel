@@ -85,7 +85,7 @@ class WhatsAppTemplateController extends Controller
 
         // HEADER
         if (!empty($data['header_type'])) {
-            $header = ['type' => 'HEADER', 'format' => $data['header_type']];
+            $header = ['type' => 'header', 'format' => $data['header_type']];
             if ($data['header_type'] === 'TEXT') {
                 $header['text'] = $data['header_text'] ?? '';
             } elseif (!empty($data['header_media_url'])) {
@@ -95,7 +95,7 @@ class WhatsAppTemplateController extends Controller
         }
 
         // BODY
-        $body = ['type' => 'BODY', 'text' => $data['body']];
+        $body = ['type' => 'body', 'text' => $data['body']];
         $examples = array_values(array_filter($data['body_examples'] ?? [], fn($v) => $v !== '' && $v !== null));
         if (!empty($examples)) {
             $body['example'] = ['body_text' => [$examples]];
@@ -104,7 +104,7 @@ class WhatsAppTemplateController extends Controller
 
         // FOOTER
         if (!empty($data['footer'])) {
-            $components['footer'] = ['type' => 'FOOTER', 'text' => $data['footer']];
+            $components['footer'] = ['type' => 'footer', 'text' => $data['footer']];
         }
 
         // BUTTONS
