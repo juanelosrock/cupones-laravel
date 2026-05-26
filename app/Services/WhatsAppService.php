@@ -144,7 +144,7 @@ class WhatsAppService
         $payload = [
             'name'       => $data['name'],
             'locale'     => $data['locale'],
-            'channel'    => 'whatsapp',
+            'channel'    => 'WHATSAPP',
             'senderId'   => $from,
             'category'   => $data['category'],
             'components' => $data['components'],
