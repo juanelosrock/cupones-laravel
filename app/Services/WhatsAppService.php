@@ -125,6 +125,85 @@ class WhatsAppService
     }
 
     /**
+     * Create a new WhatsApp template in Zenvia and submit it to Meta for approval.
+     */
+    public function createTemplate(array $data): array
+    {
+        $driver = Setting::get('whatsapp_driver') ?? config('services.whatsapp.driver', 'log');
+        if ($driver !== 'zenvia') {
+            return ['success' => false, 'message' => 'Driver no es Zenvia. Configura las credenciales en Proveedores.'];
+        }
+
+        $token  = Setting::get('whatsapp_zenvia_token') ?? config('services.whatsapp.zenvia_token', '');
+        $from   = Setting::get('whatsapp_zenvia_from')  ?? config('services.whatsapp.zenvia_from', '');
+
+        if (empty($token) || empty($from)) {
+            return ['success' => false, 'message' => 'Credenciales Zenvia no configuradas (token o número origen).'];
+        }
+
+        $payload = [
+            'name'       => $data['name'],
+            'locale'     => $data['locale'],
+            'channel'    => 'whatsapp',
+            'senderId'   => $from,
+            'category'   => $data['category'],
+            'components' => $data['components'],
+        ];
+
+        try {
+            $response = Http::withHeaders([
+                'X-API-TOKEN'  => $token,
+                'Content-Type' => 'application/json',
+            ])->post('https://api.zenvia.com/v2/templates', $payload);
+
+            Log::info("Zenvia createTemplate [{$response->status()}]: " . $response->body());
+
+            if ($response->successful()) {
+                return ['success' => true, 'template' => $response->json()];
+            }
+
+            $error = $response->json('message') ?? $response->body();
+            return ['success' => false, 'message' => "Zenvia {$response->status()}: {$error}"];
+        } catch (\Throwable $e) {
+            Log::error('Zenvia createTemplate exception: ' . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Delete a WhatsApp template from Zenvia.
+     */
+    public function deleteTemplate(string $templateId): array
+    {
+        $driver = Setting::get('whatsapp_driver') ?? config('services.whatsapp.driver', 'log');
+        if ($driver !== 'zenvia') {
+            return ['success' => false, 'message' => 'Driver no es Zenvia.'];
+        }
+
+        $token = Setting::get('whatsapp_zenvia_token') ?? config('services.whatsapp.zenvia_token', '');
+        if (empty($token)) {
+            return ['success' => false, 'message' => 'Token Zenvia no configurado.'];
+        }
+
+        try {
+            $response = Http::withHeaders(['X-API-TOKEN' => $token])
+                ->delete("https://api.zenvia.com/v2/templates/{$templateId}");
+
+            Log::info("Zenvia deleteTemplate/{$templateId} [{$response->status()}]");
+
+            if ($response->successful() || $response->status() === 204) {
+                return ['success' => true];
+            }
+
+            $error = $response->json('message') ?? $response->body();
+            return ['success' => false, 'message' => "Zenvia {$response->status()}: {$error}"];
+        } catch (\Throwable $e) {
+            Log::error("Zenvia deleteTemplate/{$templateId} exception: " . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Fetch WhatsApp templates registered in the Zenvia account.
      * Returns [] when driver is not zenvia or credentials are missing.
      */

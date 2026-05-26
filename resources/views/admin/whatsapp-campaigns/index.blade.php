@@ -7,10 +7,16 @@
         <h1 class="text-2xl font-bold text-gray-900">Campañas WhatsApp</h1>
         <p class="text-sm text-gray-500 mt-0.5">Envíos masivos por WhatsApp vía Zenvia</p>
     </div>
-    <a href="{{ route('admin.whatsapp-campaigns.create') }}"
-       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-        + Nueva Campaña WhatsApp
-    </a>
+    <div class="flex gap-2">
+        <a href="{{ route('admin.whatsapp-templates.index') }}"
+           class="border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            📋 Plantillas
+        </a>
+        <a href="{{ route('admin.whatsapp-campaigns.create') }}"
+           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+            + Nueva Campaña WhatsApp
+        </a>
+    </div>
 </div>
 
 {{-- KPI Cards --}}

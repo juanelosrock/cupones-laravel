@@ -114,6 +114,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('whatsapp-campaigns/{whatsAppCampaign}/sync-recipients',                       [Admin\WhatsAppCampaignController::class, 'syncRecipients'])->name('whatsapp-campaigns.sync-recipients');
     Route::post('whatsapp-campaigns/{whatsAppCampaign}/link-batch',                            [Admin\WhatsAppCampaignController::class, 'linkBatch'])->name('whatsapp-campaigns.link-batch');
 
+    // Plantillas WhatsApp (Zenvia)
+    Route::get('whatsapp-templates',                 [Admin\WhatsAppTemplateController::class, 'index'])  ->name('whatsapp-templates.index');
+    Route::get('whatsapp-templates/create',          [Admin\WhatsAppTemplateController::class, 'create']) ->name('whatsapp-templates.create');
+    Route::post('whatsapp-templates',                [Admin\WhatsAppTemplateController::class, 'store'])  ->name('whatsapp-templates.store');
+    Route::delete('whatsapp-templates/{templateId}', [Admin\WhatsAppTemplateController::class, 'destroy'])->name('whatsapp-templates.destroy');
+
     // API Clients — rutas fijas ANTES de {apiClient}
     Route::get('api-clients',                               [Admin\ApiClientController::class, 'index'])->name('api-clients.index');
     Route::get('api-clients/create',                        [Admin\ApiClientController::class, 'create'])->name('api-clients.create');
