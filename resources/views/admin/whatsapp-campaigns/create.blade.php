@@ -364,7 +364,7 @@
                                    placeholder="ej: a1b2c3d4-e5f6-7890-abcd-ef1234567890"
                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500 @error('template_id') border-red-400 @enderror">
                             <p class="text-xs text-gray-400 mt-0.5">UUID del template registrado en tu cuenta Zenvia
-                                @if($waDriver === 'zenvia')— o usa el botón "Cargar desde Zenvia" para seleccionar@endif
+                                @if($waDriver === 'zenvia') — o usa el botón "Cargar desde Zenvia" para seleccionar @endif
                             </p>
                         </div>
                     </template>
