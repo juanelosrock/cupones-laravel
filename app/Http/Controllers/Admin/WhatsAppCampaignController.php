@@ -9,6 +9,7 @@ use App\Models\CouponBatch;
 use App\Models\WhatsAppCampaign;
 use App\Models\WhatsAppRecipient;
 use App\Services\AuditService;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 
 class WhatsAppCampaignController extends Controller
@@ -204,6 +205,39 @@ class WhatsAppCampaignController extends Controller
         }
 
         return $rows;
+    }
+
+    public function templatesList(WhatsAppService $whatsApp)
+    {
+        $raw = $whatsApp->getTemplates();
+
+        $templates = collect($raw)
+            ->filter(fn($t) => strtolower($t['channel'] ?? '') === 'whatsapp')
+            ->map(function ($t) {
+                // Extract variable count from BODY component
+                $bodyText  = '';
+                $varNames  = [];
+                foreach ($t['components'] ?? [] as $comp) {
+                    if (strtoupper($comp['type'] ?? '') === 'BODY') {
+                        $bodyText = $comp['text'] ?? '';
+                        preg_match_all('/\{\{(\w+)\}\}/', $bodyText, $m);
+                        $varNames = $m[1] ?? [];
+                        break;
+                    }
+                }
+                return [
+                    'id'        => $t['id'],
+                    'name'      => $t['name'] ?? $t['id'],
+                    'category'  => $t['category'] ?? '',
+                    'status'    => $t['status'] ?? '',
+                    'locale'    => $t['locale'] ?? '',
+                    'body'      => $bodyText,
+                    'variables' => array_values(array_unique($varNames)),
+                ];
+            })
+            ->values();
+
+        return response()->json(['templates' => $templates]);
     }
 
     public function show(WhatsAppCampaign $whatsAppCampaign)

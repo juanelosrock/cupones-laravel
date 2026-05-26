@@ -105,6 +105,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('whatsapp-campaigns',                                                           [Admin\WhatsAppCampaignController::class, 'index'])->name('whatsapp-campaigns.index');
     Route::get('whatsapp-campaigns/create',                                                    [Admin\WhatsAppCampaignController::class, 'create'])->name('whatsapp-campaigns.create');
     Route::post('whatsapp-campaigns',                                                          [Admin\WhatsAppCampaignController::class, 'store'])->name('whatsapp-campaigns.store');
+    Route::get('whatsapp-campaigns/zenvia-templates',                                          [Admin\WhatsAppCampaignController::class, 'templatesList'])->name('whatsapp-campaigns.templates');
     Route::get('whatsapp-campaigns/{whatsAppCampaign}',                                        [Admin\WhatsAppCampaignController::class, 'show'])->name('whatsapp-campaigns.show');
     Route::post('whatsapp-campaigns/{whatsAppCampaign}/send',                                  [Admin\WhatsAppCampaignController::class, 'send'])->name('whatsapp-campaigns.send');
     Route::post('whatsapp-campaigns/{whatsAppCampaign}/cancel',                                [Admin\WhatsAppCampaignController::class, 'cancel'])->name('whatsapp-campaigns.cancel');

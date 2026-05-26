@@ -124,6 +124,38 @@ class WhatsAppService
         ];
     }
 
+    /**
+     * Fetch WhatsApp templates registered in the Zenvia account.
+     * Returns [] when driver is not zenvia or credentials are missing.
+     */
+    public function getTemplates(): array
+    {
+        $driver = Setting::get('whatsapp_driver') ?? config('services.whatsapp.driver', 'log');
+        if ($driver !== 'zenvia') {
+            return [];
+        }
+
+        $token = Setting::get('whatsapp_zenvia_token') ?? config('services.whatsapp.zenvia_token', '');
+        if (empty($token)) {
+            return [];
+        }
+
+        try {
+            $response = Http::withHeaders(['X-API-TOKEN' => $token])
+                ->get('https://api.zenvia.com/v2/templates', ['channel' => 'whatsapp']);
+
+            if (!$response->successful()) {
+                Log::warning('Zenvia getTemplates failed: HTTP ' . $response->status() . ' — ' . $response->body());
+                return [];
+            }
+
+            return $response->json('templates', []);
+        } catch (\Throwable $e) {
+            Log::error('Zenvia getTemplates exception: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     public function renderTemplate(string $template, array $vars): string
     {
         foreach ($vars as $key => $value) {

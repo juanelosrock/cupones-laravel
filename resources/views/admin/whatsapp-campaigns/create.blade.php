@@ -275,18 +275,109 @@
                     <p class="font-semibold">¿Cómo funciona una plantilla Zenvia?</p>
                     <ol class="list-decimal list-inside space-y-1 text-green-700">
                         <li>Registra y aprueba tu plantilla en el panel de Zenvia (con variables como <code class="bg-green-100 px-0.5 rounded">@{{1}}</code>, <code class="bg-green-100 px-0.5 rounded">@{{2}}</code> o nombres personalizados)</li>
-                        <li>Copia el <strong>Template ID</strong> (UUID) desde Zenvia</li>
-                        <li>Define aquí el valor de cada variable usando <code class="bg-green-100 px-0.5 rounded">{name}</code>, <code class="bg-green-100 px-0.5 rounded">{code}</code>, <code class="bg-green-100 px-0.5 rounded">{discount}</code></li>
+                        <li>Selecciona la plantilla del combobox o ingresa el UUID manualmente</li>
+                        <li>Define el valor de cada variable usando <code class="bg-green-100 px-0.5 rounded">{name}</code>, <code class="bg-green-100 px-0.5 rounded">{code}</code>, <code class="bg-green-100 px-0.5 rounded">{discount}</code></li>
                     </ol>
                 </div>
 
+                {{-- Template picker --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Template ID <span class="text-red-500">*</span></label>
-                    <input type="text" name="template_id" value="{{ old('template_id') }}"
-                           placeholder="ej: a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500 @error('template_id') border-red-400 @enderror">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium text-gray-700">Template ID <span class="text-red-500">*</span></label>
+                        @php $waDriver = \App\Models\Setting::get('whatsapp_driver') ?? config('services.whatsapp.driver', 'log'); @endphp
+                        @if($waDriver === 'zenvia')
+                            <button type="button"
+                                    @click="loadTemplates()"
+                                    :disabled="templatesLoading"
+                                    class="flex items-center gap-1.5 text-xs text-green-700 hover:text-green-900 border border-green-300 hover:border-green-500 bg-white hover:bg-green-50 px-3 py-1 rounded-lg transition-colors disabled:opacity-50">
+                                <template x-if="!templatesLoading">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                </template>
+                                <template x-if="templatesLoading">
+                                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/></svg>
+                                </template>
+                                <span x-text="templatesLoaded ? 'Actualizar plantillas' : 'Cargar desde Zenvia'"></span>
+                            </button>
+                        @endif
+                    </div>
+
+                    {{-- Combobox (visible cuando hay templates cargados) --}}
+                    <template x-if="zenviaTemplates.length > 0">
+                        <div class="space-y-2">
+                            <div class="relative">
+                                <input type="text"
+                                       x-model="templateSearch"
+                                       @focus="templateDropdownOpen = true"
+                                       @click.outside="templateDropdownOpen = false"
+                                       placeholder="Buscar plantilla por nombre..."
+                                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 pr-8">
+                                <span class="absolute right-2 top-2.5 text-gray-400 pointer-events-none">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </span>
+                                <div x-show="templateDropdownOpen && filteredTemplates().length > 0"
+                                     x-transition
+                                     class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-56 overflow-y-auto">
+                                    <template x-for="tpl in filteredTemplates()" :key="tpl.id">
+                                        <button type="button"
+                                                @click="selectTemplate(tpl)"
+                                                class="w-full text-left px-3 py-2.5 hover:bg-green-50 border-b border-gray-50 last:border-0">
+                                            <p class="text-sm font-medium text-gray-800" x-text="tpl.name"></p>
+                                            <p class="text-xs text-gray-400 mt-0.5">
+                                                <span x-text="tpl.id"></span>
+                                                <template x-if="tpl.category">
+                                                    <span class="ml-2 bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded text-[10px]" x-text="tpl.category"></span>
+                                                </template>
+                                                <template x-if="tpl.status">
+                                                    <span :class="tpl.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
+                                                          class="ml-1 px-1.5 py-0.5 rounded text-[10px]" x-text="tpl.status"></span>
+                                                </template>
+                                            </p>
+                                            <template x-if="tpl.body">
+                                                <p class="text-xs text-gray-500 mt-0.5 truncate" x-text="tpl.body"></p>
+                                            </template>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                            {{-- Selected template badge --}}
+                            <template x-if="selectedTemplate">
+                                <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                                    <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-green-800" x-text="selectedTemplate.name"></p>
+                                        <p class="text-[10px] text-green-600 font-mono truncate" x-text="selectedTemplate.id"></p>
+                                    </div>
+                                    <button type="button" @click="clearTemplate()" class="text-green-400 hover:text-red-500 ml-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    {{-- Manual input (shown when no templates loaded or as fallback) --}}
+                    <template x-if="zenviaTemplates.length === 0">
+                        <div>
+                            <input type="text" name="template_id" :value="templateId"
+                                   @input="templateId = $event.target.value"
+                                   value="{{ old('template_id') }}"
+                                   placeholder="ej: a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500 @error('template_id') border-red-400 @enderror">
+                            <p class="text-xs text-gray-400 mt-0.5">UUID del template registrado en tu cuenta Zenvia
+                                @if($waDriver === 'zenvia')— o usa el botón "Cargar desde Zenvia" para seleccionar@endif
+                            </p>
+                        </div>
+                    </template>
+
+                    {{-- Hidden input always submitted --}}
+                    <input type="hidden" name="template_id" :value="templateId">
+
                     @error('template_id')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                    <p class="text-xs text-gray-400 mt-0.5">UUID del template registrado en tu cuenta Zenvia</p>
+
+                    {{-- Error al cargar templates --}}
+                    <template x-if="templatesError">
+                        <p class="mt-1 text-xs text-red-500" x-text="templatesError"></p>
+                    </template>
                 </div>
 
                 <div>
@@ -426,6 +517,16 @@ function waCreate(campaignData) {
         csvFileName: null,
         csvFileSize: null,
 
+        // Template combobox state
+        templateId: @json(old('template_id', '')),
+        zenviaTemplates: [],
+        templatesLoading: false,
+        templatesLoaded: false,
+        templatesError: null,
+        templateSearch: '',
+        templateDropdownOpen: false,
+        selectedTemplate: null,
+
         init() {
             const oldId = @json(old('campaign_id', ''));
             if (oldId && this.campaignData[oldId]) {
@@ -438,6 +539,57 @@ function waCreate(campaignData) {
             if (this.templateFields.length === 0) {
                 this.templateFields = [{key: '1', value: '{name}'}, {key: '2', value: '{code}'}, {key: '3', value: '{discount}'}];
             }
+        },
+
+        async loadTemplates() {
+            this.templatesLoading = true;
+            this.templatesError  = null;
+            try {
+                const res = await fetch('{{ route('admin.whatsapp-campaigns.templates') }}', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                this.zenviaTemplates = data.templates || [];
+                this.templatesLoaded = true;
+                if (this.zenviaTemplates.length === 0) {
+                    this.templatesError = 'No se encontraron plantillas WhatsApp aprobadas en tu cuenta Zenvia.';
+                }
+            } catch (e) {
+                this.templatesError = 'Error al cargar plantillas: ' + e.message;
+            } finally {
+                this.templatesLoading = false;
+            }
+        },
+
+        filteredTemplates() {
+            if (!this.templateSearch.trim()) return this.zenviaTemplates;
+            const q = this.templateSearch.toLowerCase();
+            return this.zenviaTemplates.filter(t =>
+                t.name.toLowerCase().includes(q) || t.id.toLowerCase().includes(q)
+            );
+        },
+
+        selectTemplate(tpl) {
+            this.selectedTemplate   = tpl;
+            this.templateId         = tpl.id;
+            this.templateSearch     = tpl.name;
+            this.templateDropdownOpen = false;
+
+            // Auto-fill template variables from the template's body variables
+            if (tpl.variables && tpl.variables.length > 0) {
+                const defaultValues = { '1': '{name}', '2': '{code}', '3': '{discount}', 'name': '{name}', 'code': '{code}', 'discount': '{discount}', 'phone': '{phone}' };
+                this.templateFields = tpl.variables.map(v => ({
+                    key:   v,
+                    value: defaultValues[v] ?? '',
+                }));
+            }
+        },
+
+        clearTemplate() {
+            this.selectedTemplate = null;
+            this.templateId       = '';
+            this.templateSearch   = '';
         },
 
         selectCampaign(id) {
@@ -518,7 +670,7 @@ function waCreate(campaignData) {
             this.templateFields.forEach(f => { if (f.key) fields[f.key] = f.value || ''; });
             return JSON.stringify({
                 type: 'template',
-                templateId: document.querySelector('[name=template_id]')?.value || '<template-id>',
+                templateId: this.templateId || '<template-id>',
                 fields
             }, null, 2);
         }
