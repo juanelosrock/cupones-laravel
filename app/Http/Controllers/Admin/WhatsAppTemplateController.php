@@ -83,9 +83,9 @@ class WhatsAppTemplateController extends Controller
         // lowercase type name, not an array — despite GET returning an array.
         $components = [];
 
-        // HEADER — type = content format (TEXT | IMAGE | VIDEO | DOCUMENT)
+        // HEADER — type = content format lowercase (text | image | video | document)
         if (!empty($data['header_type'])) {
-            $header = ['type' => $data['header_type']];
+            $header = ['type' => strtolower($data['header_type'])];
             if ($data['header_type'] === 'TEXT') {
                 $header['text'] = $data['header_text'] ?? '';
             } elseif (!empty($data['header_media_url'])) {
@@ -94,17 +94,17 @@ class WhatsAppTemplateController extends Controller
             $components['header'] = $header;
         }
 
-        // BODY — type is always TEXT
-        $body = ['type' => 'TEXT', 'text' => $data['body']];
+        // BODY — type is always "text" (lowercase)
+        $body = ['type' => 'text', 'text' => $data['body']];
         $examples = array_values(array_filter($data['body_examples'] ?? [], fn($v) => $v !== '' && $v !== null));
         if (!empty($examples)) {
             $body['example'] = ['body_text' => [$examples]];
         }
         $components['body'] = $body;
 
-        // FOOTER — type is always TEXT
+        // FOOTER — type is always "text" (lowercase)
         if (!empty($data['footer'])) {
-            $components['footer'] = ['type' => 'TEXT', 'text' => $data['footer']];
+            $components['footer'] = ['type' => 'text', 'text' => $data['footer']];
         }
 
         // BUTTONS

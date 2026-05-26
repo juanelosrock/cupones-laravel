@@ -151,6 +151,8 @@ class WhatsAppService
         ];
 
         try {
+            Log::info("Zenvia createTemplate payload: " . json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
             $response = Http::withHeaders([
                 'X-API-TOKEN'  => $token,
                 'Content-Type' => 'application/json',
