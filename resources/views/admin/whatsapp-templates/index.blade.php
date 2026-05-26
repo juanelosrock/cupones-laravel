@@ -52,7 +52,7 @@
 @else
     {{-- Legend --}}
     <div class="flex flex-wrap gap-3 mb-4 text-xs">
-        @foreach(['APPROVED'=>['bg-green-100 text-green-800','Aprobada'],'PENDING'=>['bg-yellow-100 text-yellow-800','Pendiente'],'REJECTED'=>['bg-red-100 text-red-800','Rechazada'],'PAUSED'=>['bg-gray-100 text-gray-600','Pausada']] as $s=>[$cls,$lbl])
+        @foreach(['APPROVED'=>['bg-green-100 text-green-800','✓ Aprobada'],'WAITING_APPROVAL'=>['bg-yellow-100 text-yellow-800','⏳ En revisión Meta'],'WAITING_REVIEW'=>['bg-blue-100 text-blue-800','🔍 Revisión Zenvia'],'REJECTED'=>['bg-red-100 text-red-800','✗ Rechazada'],'PAUSED'=>['bg-gray-100 text-gray-600','Pausada']] as $s=>[$cls,$lbl])
             <span class="flex items-center gap-1"><span class="px-2 py-0.5 rounded-full {{ $cls }}">{{ $lbl }}</span></span>
         @endforeach
     </div>
@@ -67,16 +67,22 @@
                         <span class="font-semibold text-gray-900 font-mono text-sm">{{ $tpl['name'] }}</span>
                         @php
                             $statusClass = match($tpl['status']) {
-                                'APPROVED' => 'bg-green-100 text-green-800',
-                                'PENDING'  => 'bg-yellow-100 text-yellow-800',
-                                'REJECTED' => 'bg-red-100 text-red-800',
-                                default    => 'bg-gray-100 text-gray-600',
+                                'APPROVED'         => 'bg-green-100 text-green-800',
+                                'WAITING_APPROVAL' => 'bg-yellow-100 text-yellow-800',
+                                'WAITING_REVIEW'   => 'bg-blue-100 text-blue-800',
+                                'REJECTED'         => 'bg-red-100 text-red-800',
+                                'PAUSED'           => 'bg-orange-100 text-orange-700',
+                                'DISABLED'         => 'bg-gray-200 text-gray-500',
+                                default            => 'bg-gray-100 text-gray-600',
                             };
                             $statusLabel = match($tpl['status']) {
-                                'APPROVED' => '✓ Aprobada',
-                                'PENDING'  => '⏳ Pendiente',
-                                'REJECTED' => '✗ Rechazada',
-                                default    => $tpl['status'],
+                                'APPROVED'         => '✓ Aprobada',
+                                'WAITING_APPROVAL' => '⏳ En revisión Meta',
+                                'WAITING_REVIEW'   => '🔍 Revisión Zenvia',
+                                'REJECTED'         => '✗ Rechazada',
+                                'PAUSED'           => '⏸ Pausada',
+                                'DISABLED'         => 'Deshabilitada',
+                                default            => $tpl['status'],
                             };
                         @endphp
                         <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">{{ $statusLabel }}</span>

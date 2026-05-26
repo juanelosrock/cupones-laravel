@@ -230,12 +230,24 @@ class WhatsAppService
             $response = Http::withHeaders(['X-API-TOKEN' => $token])
                 ->get('https://api.zenvia.com/v2/templates', ['channel' => 'WHATSAPP']);
 
+            Log::info('Zenvia getTemplates [' . $response->status() . ']: ' . $response->body());
+
             if (!$response->successful()) {
                 Log::warning('Zenvia getTemplates failed: HTTP ' . $response->status() . ' — ' . $response->body());
                 return [];
             }
 
-            return $response->json('templates', []);
+            $body = $response->json();
+            // Zenvia may return an array directly or wrap under a key — detect both
+            if (is_array($body) && isset($body[0])) {
+                return $body; // root-level array
+            }
+            foreach (['templates', 'data', 'items', 'content'] as $key) {
+                if (isset($body[$key]) && is_array($body[$key])) {
+                    return $body[$key];
+                }
+            }
+            return [];
         } catch (\Throwable $e) {
             Log::error('Zenvia getTemplates exception: ' . $e->getMessage());
             return [];

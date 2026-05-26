@@ -148,18 +148,50 @@ class WhatsAppTemplateController extends Controller
         $footer = null;
         $buttons = [];
 
-        foreach ($t['components'] ?? [] as $comp) {
-            $type = strtoupper($comp['type'] ?? '');
-            if ($type === 'BODY') {
-                $body = $comp['text'] ?? '';
+        $components = $t['components'] ?? [];
+
+        // Zenvia GET returns components as a keyed object: {"body": {...}, "header": {...}}
+        // Meta/FB format returns components as a sequential array: [{"type":"BODY",...}]
+        // Detect which format by checking if array has string keys
+        $isKeyed = array_keys($components) !== range(0, count($components) - 1);
+
+        if ($isKeyed) {
+            // Zenvia object format: key is the section name
+            if (isset($components['body'])) {
+                $body = $components['body']['text'] ?? '';
                 preg_match_all('/\{\{(\w+)\}\}/', $body, $m);
                 $vars = $m[1] ?? [];
-            } elseif ($type === 'HEADER') {
-                $header = ['format' => $comp['format'] ?? 'TEXT', 'text' => $comp['text'] ?? ''];
-            } elseif ($type === 'FOOTER') {
-                $footer = $comp['text'] ?? '';
-            } elseif ($type === 'BUTTONS') {
-                $buttons = $comp['buttons'] ?? [];
+            }
+            if (isset($components['header'])) {
+                $h = $components['header'];
+                $header = ['format' => $h['type'] ?? 'TEXT', 'text' => $h['text'] ?? ''];
+            }
+            if (isset($components['footer'])) {
+                $footer = $components['footer']['text'] ?? '';
+            }
+            if (isset($components['buttons'])) {
+                $buttons = is_array($components['buttons']) && isset($components['buttons'][0])
+                    ? $components['buttons']
+                    : [$components['buttons']];
+            }
+        } else {
+            // Sequential array format (Meta/FB style)
+            foreach ($components as $comp) {
+                $type = strtoupper($comp['type'] ?? '');
+                if ($type === 'BODY' || str_contains($type, 'TEXT')) {
+                    // Also handle entries without a parent section key
+                    if (empty($body)) {
+                        $body = $comp['text'] ?? '';
+                        preg_match_all('/\{\{(\w+)\}\}/', $body, $m);
+                        $vars = $m[1] ?? [];
+                    }
+                } elseif ($type === 'HEADER') {
+                    $header = ['format' => $comp['format'] ?? 'TEXT', 'text' => $comp['text'] ?? ''];
+                } elseif ($type === 'FOOTER') {
+                    $footer = $comp['text'] ?? '';
+                } elseif ($type === 'BUTTONS') {
+                    $buttons = $comp['buttons'] ?? [];
+                }
             }
         }
 
