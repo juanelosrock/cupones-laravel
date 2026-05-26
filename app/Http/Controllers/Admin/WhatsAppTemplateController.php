@@ -83,28 +83,40 @@ class WhatsAppTemplateController extends Controller
         // lowercase type name, not an array — despite GET returning an array.
         $components = [];
 
-        // HEADER — type = content format lowercase (text | image | video | document)
+        // HEADER — Zenvia enum: TEXT_FIXED | TEXT_TEMPLATE | MEDIA_IMAGE | MEDIA_VIDEO | MEDIA_DOCUMENT
         if (!empty($data['header_type'])) {
-            $header = ['type' => strtolower($data['header_type'])];
+            $headerText = $data['header_text'] ?? '';
+            $headerTypeMap = [
+                'IMAGE'    => 'MEDIA_IMAGE',
+                'VIDEO'    => 'MEDIA_VIDEO',
+                'DOCUMENT' => 'MEDIA_DOCUMENT',
+            ];
             if ($data['header_type'] === 'TEXT') {
-                $header['text'] = $data['header_text'] ?? '';
-            } elseif (!empty($data['header_media_url'])) {
-                $header['example'] = ['header_handle' => [$data['header_media_url']]];
+                $zenviaType = preg_match('/\{\{\w+\}\}/', $headerText) ? 'TEXT_TEMPLATE' : 'TEXT_FIXED';
+                $components['header'] = ['type' => $zenviaType, 'text' => $headerText];
+            } else {
+                $zenviaType = $headerTypeMap[$data['header_type']] ?? 'MEDIA_IMAGE';
+                $header = ['type' => $zenviaType];
+                if (!empty($data['header_media_url'])) {
+                    $header['example'] = ['header_handle' => [$data['header_media_url']]];
+                }
+                $components['header'] = $header;
             }
-            $components['header'] = $header;
         }
 
-        // BODY — type is always "text" (lowercase)
-        $body = ['type' => 'text', 'text' => $data['body']];
+        // BODY — Zenvia enum: TEXT_FIXED | TEXT_TEMPLATE
+        $bodyText = $data['body'];
+        $bodyType = preg_match('/\{\{\w+\}\}/', $bodyText) ? 'TEXT_TEMPLATE' : 'TEXT_FIXED';
+        $body = ['type' => $bodyType, 'text' => $bodyText];
         $examples = array_values(array_filter($data['body_examples'] ?? [], fn($v) => $v !== '' && $v !== null));
         if (!empty($examples)) {
             $body['example'] = ['body_text' => [$examples]];
         }
         $components['body'] = $body;
 
-        // FOOTER — type is always "text" (lowercase)
+        // FOOTER — Zenvia enum: TEXT_FIXED (only value)
         if (!empty($data['footer'])) {
-            $components['footer'] = ['type' => 'text', 'text' => $data['footer']];
+            $components['footer'] = ['type' => 'TEXT_FIXED', 'text' => $data['footer']];
         }
 
         // BUTTONS

@@ -223,7 +223,7 @@ class WhatsAppService
 
         try {
             $response = Http::withHeaders(['X-API-TOKEN' => $token])
-                ->get('https://api.zenvia.com/v2/templates', ['channel' => 'whatsapp']);
+                ->get('https://api.zenvia.com/v2/templates', ['channel' => 'WHATSAPP']);
 
             if (!$response->successful()) {
                 Log::warning('Zenvia getTemplates failed: HTTP ' . $response->status() . ' — ' . $response->body());
