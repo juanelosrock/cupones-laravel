@@ -84,17 +84,18 @@ class WhatsAppTemplateController extends Controller
         $components = [];
 
         // HEADER — Zenvia enum: TEXT_FIXED | TEXT_TEMPLATE | MEDIA_IMAGE | MEDIA_VIDEO | MEDIA_DOCUMENT
+        // Skip header entirely if type is TEXT but text is empty (x-show keeps hidden inputs in DOM)
         if (!empty($data['header_type'])) {
-            $headerText = $data['header_text'] ?? '';
+            $headerText = trim($data['header_text'] ?? '');
             $headerTypeMap = [
                 'IMAGE'    => 'MEDIA_IMAGE',
                 'VIDEO'    => 'MEDIA_VIDEO',
                 'DOCUMENT' => 'MEDIA_DOCUMENT',
             ];
-            if ($data['header_type'] === 'TEXT') {
+            if ($data['header_type'] === 'TEXT' && $headerText !== '') {
                 $zenviaType = preg_match('/\{\{\w+\}\}/', $headerText) ? 'TEXT_TEMPLATE' : 'TEXT_FIXED';
                 $components['header'] = ['type' => $zenviaType, 'text' => $headerText];
-            } else {
+            } elseif ($data['header_type'] !== 'TEXT') {
                 $zenviaType = $headerTypeMap[$data['header_type']] ?? 'MEDIA_IMAGE';
                 $header = ['type' => $zenviaType];
                 if (!empty($data['header_media_url'])) {

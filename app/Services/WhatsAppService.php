@@ -164,7 +164,12 @@ class WhatsAppService
                 return ['success' => true, 'template' => $response->json()];
             }
 
-            $error = $response->json('message') ?? $response->body();
+            $body  = $response->json();
+            $error = $body['message'] ?? $response->body();
+            if (!empty($body['details'])) {
+                $detail = collect($body['details'])->map(fn($d) => ($d['path'] ?? '') . ': ' . ($d['message'] ?? ''))->implode(' | ');
+                $error .= ' — ' . $detail;
+            }
             return ['success' => false, 'message' => "Zenvia {$response->status()}: {$error}"];
         } catch (\Throwable $e) {
             Log::error('Zenvia createTemplate exception: ' . $e->getMessage());
