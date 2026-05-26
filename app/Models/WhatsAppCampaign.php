@@ -10,7 +10,7 @@ class WhatsAppCampaign extends Model
 
     protected $table    = 'whatsapp_campaigns';
     protected $fillable = [
-        'name', 'campaign_id', 'coupon_batch_id',
+        'name', 'campaign_id', 'recipient_source', 'coupon_batch_id',
         'message_template', 'content_type', 'template_id', 'template_fields', 'filters',
         'total_recipients', 'sent_count', 'failed_count', 'status',
         'scheduled_at', 'started_at', 'finished_at', 'created_by_user_id',

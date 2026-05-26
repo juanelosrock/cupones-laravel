@@ -77,7 +77,9 @@ class WhatsAppCampaignController extends Controller
     {
         $data = $request->validate([
             'name'             => 'required|string|max:150',
-            'campaign_id'      => 'required|exists:campaigns,id',
+            'recipient_source' => 'required|in:campaign,csv',
+            'campaign_id'      => 'required_if:recipient_source,campaign|nullable|exists:campaigns,id',
+            'csv_file'         => 'required_if:recipient_source,csv|nullable|file|mimes:csv,txt|max:10240',
             'coupon_batch_id'  => 'nullable|exists:coupon_batches,id',
             'content_type'     => 'required|in:text,template',
             'message_template' => 'required_if:content_type,text|nullable|string|max:4096',
@@ -87,12 +89,10 @@ class WhatsAppCampaignController extends Controller
             'scheduled_at'     => 'nullable|date|after:now',
         ]);
 
-        // Sanitise: keep only non-empty template fields
         if (!empty($data['template_fields'])) {
             $data['template_fields'] = array_filter($data['template_fields'], fn($v) => $v !== '' && $v !== null);
         }
 
-        // For text mode, template_id is irrelevant and vice versa
         if ($data['content_type'] === 'text') {
             $data['template_id']     = null;
             $data['template_fields'] = null;
@@ -100,32 +100,110 @@ class WhatsAppCampaignController extends Controller
             $data['message_template'] = null;
         }
 
-        $campaign  = Campaign::findOrFail($data['campaign_id']);
-        $customers = $campaign->customers()
-            ->where('customers.status', 'active')
-            ->get(['customers.id', 'customers.phone', 'customers.name']);
-
         $data['created_by_user_id'] = auth()->id();
         $data['status']             = $data['scheduled_at'] ? 'scheduled' : 'draft';
-        $data['total_recipients']   = $customers->count();
 
-        $waCampaign = WhatsAppCampaign::create($data);
+        // ── Build recipient list ──────────────────────────────────────────────
+        if ($data['recipient_source'] === 'csv') {
+            $rows = $this->parseCsvRecipients($request->file('csv_file'));
 
-        foreach ($customers->chunk(500) as $chunk) {
-            $records = $chunk->map(fn($c) => [
-                'whatsapp_campaign_id' => $waCampaign->id,
-                'customer_id'          => $c->id,
-                'phone'                => $c->phone,
-                'status'               => 'pending',
-                'created_at'           => now(),
-            ])->toArray();
-            WhatsAppRecipient::insert($records);
+            if (empty($rows)) {
+                return back()->withInput()->with('error', 'El CSV no contiene teléfonos válidos.');
+            }
+
+            $data['total_recipients'] = count($rows);
+            $data['campaign_id']      = null;
+
+            $waCampaign = WhatsAppCampaign::create($data);
+
+            foreach (array_chunk($rows, 500) as $chunk) {
+                $records = array_map(fn($r) => [
+                    'whatsapp_campaign_id' => $waCampaign->id,
+                    'customer_id'          => null,
+                    'phone'                => $r['phone'],
+                    'name'                 => $r['name'] ?? null,
+                    'status'               => 'pending',
+                    'created_at'           => now(),
+                ], $chunk);
+                WhatsAppRecipient::insert($records);
+            }
+        } else {
+            $campaign  = Campaign::findOrFail($data['campaign_id']);
+            $customers = $campaign->customers()
+                ->where('customers.status', 'active')
+                ->get(['customers.id', 'customers.phone', 'customers.name']);
+
+            $data['total_recipients'] = $customers->count();
+
+            $waCampaign = WhatsAppCampaign::create($data);
+
+            foreach ($customers->chunk(500) as $chunk) {
+                $records = $chunk->map(fn($c) => [
+                    'whatsapp_campaign_id' => $waCampaign->id,
+                    'customer_id'          => $c->id,
+                    'phone'                => $c->phone,
+                    'name'                 => null,
+                    'status'               => 'pending',
+                    'created_at'           => now(),
+                ])->toArray();
+                WhatsAppRecipient::insert($records);
+            }
         }
 
         AuditService::log('created', WhatsAppCampaign::class, $waCampaign->id, [], $waCampaign->toArray());
 
         return redirect()->route('admin.whatsapp-campaigns.show', $waCampaign)
-            ->with('success', "Campaña WhatsApp creada con {$customers->count()} destinatarios.");
+            ->with('success', "Campaña WhatsApp creada con {$data['total_recipients']} destinatarios.");
+    }
+
+    private function parseCsvRecipients(\Illuminate\Http\UploadedFile $file): array
+    {
+        $lines = file($file->path(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if (empty($lines)) return [];
+
+        // Detect separator (semicolon wins if equal or more occurrences)
+        $sep = substr_count($lines[0], ';') >= substr_count($lines[0], ',') ? ';' : ',';
+
+        // Detect header row
+        $first      = str_getcsv($lines[0], $sep);
+        $headerKeys = ['phone','telefono','tel','celular','numero','móvil','movil'];
+        $hasHeader  = in_array(strtolower(trim($first[0] ?? '')), $headerKeys);
+        $start      = $hasHeader ? 1 : 0;
+
+        // Resolve column indices
+        $phoneCol = 0;
+        $nameCol  = null;
+        if ($hasHeader) {
+            foreach ($first as $i => $col) {
+                $c = strtolower(trim($col));
+                if (in_array($c, $headerKeys))                               $phoneCol = $i;
+                if (in_array($c, ['name','nombre','names','cliente','full_name'])) $nameCol  = $i;
+            }
+        } elseif (count($first) >= 2) {
+            $nameCol = 1;
+        }
+
+        $rows = [];
+        $seen = [];
+
+        for ($i = $start; $i < min(count($lines), 10001); $i++) {
+            $cols  = str_getcsv($lines[$i], $sep);
+            $phone = preg_replace('/\D/', '', trim($cols[$phoneCol] ?? ''));
+
+            if (strlen($phone) === 10 && str_starts_with($phone, '3')) {
+                $phone = '57' . $phone;
+            }
+
+            if (strlen($phone) < 7 || isset($seen[$phone])) continue;
+
+            $seen[$phone] = true;
+            $rows[] = [
+                'phone' => $phone,
+                'name'  => $nameCol !== null ? (trim($cols[$nameCol] ?? '') ?: null) : null,
+            ];
+        }
+
+        return $rows;
     }
 
     public function show(WhatsAppCampaign $whatsAppCampaign)

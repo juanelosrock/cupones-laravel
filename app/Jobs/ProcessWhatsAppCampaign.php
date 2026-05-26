@@ -102,7 +102,7 @@ class ProcessWhatsAppCampaign implements ShouldQueue
     private function buildVars(WhatsAppRecipient $recipient, ?object $batch): array
     {
         $vars = [
-            'name'  => $recipient->customer?->name ?? 'Cliente',
+            'name'  => $recipient->customer?->name ?? $recipient->name ?? 'Cliente',
             'phone' => $recipient->phone,
             'code'  => '',
             'discount' => '',

@@ -25,7 +25,8 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.whatsapp-campaigns.store') }}">
+    <form method="POST" action="{{ route('admin.whatsapp-campaigns.store') }}"
+          enctype="multipart/form-data">
         @csrf
 
         {{-- 1: Nombre --}}
@@ -40,41 +41,155 @@
             </div>
         </div>
 
-        {{-- 2: Campaña --}}
+        {{-- 2: Destinatarios --}}
         <div class="bg-white rounded-xl shadow-sm p-6 mb-5">
-            <h2 class="text-sm font-semibold text-gray-700 mb-4">2. Campaña y clientes</h2>
+            <h2 class="text-sm font-semibold text-gray-700 mb-4">2. Destinatarios</h2>
 
-            @if($campaigns->isEmpty())
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
-                    <strong>No hay campañas con clientes disponibles.</strong>
-                    Importa clientes desde <a href="{{ route('admin.campaigns.index') }}" class="underline">Campañas</a>.
-                </div>
-            @else
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Campaña de origen <span class="text-red-500">*</span></label>
-                    <select name="campaign_id" required
-                            @change="selectCampaign($event.target.value)"
-                            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 @error('campaign_id') border-red-400 @enderror">
-                        <option value="">— Selecciona una campaña —</option>
-                        @foreach($campaigns as $campaign)
-                            <option value="{{ $campaign->id }}" {{ old('campaign_id') == $campaign->id ? 'selected' : '' }}>
-                                {{ $campaign->name }} ({{ number_format($campaign->campaign_customers_count) }} clientes)
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('campaign_id')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                </div>
+            {{-- Toggle fuente --}}
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <label class="relative cursor-pointer">
+                    <input type="radio" name="recipient_source" value="campaign"
+                           x-model="recipientSource" class="sr-only peer">
+                    <div class="border-2 rounded-xl p-4 transition-all peer-checked:border-green-500 peer-checked:bg-green-50 border-gray-200 hover:border-gray-300">
+                        <div class="text-xl mb-1">👥</div>
+                        <p class="text-sm font-semibold text-gray-800">Clientes de campaña</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Usa los clientes vinculados a una campaña existente.</p>
+                    </div>
+                    <span class="absolute top-2 right-2 hidden peer-checked:flex items-center justify-center">
+                        <span class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                            <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                    </span>
+                </label>
 
-                <template x-if="selectedCampaign">
-                    <div class="bg-green-50 border border-green-100 rounded-lg p-3 flex items-center gap-3">
-                        <div class="text-2xl">👥</div>
-                        <div>
-                            <p class="text-sm font-semibold text-green-800" x-text="selectedCampaign.customer_count + ' clientes activos'"></p>
-                            <p class="text-xs text-green-600">Recibirán el mensaje WhatsApp como destinatarios</p>
+                <label class="relative cursor-pointer">
+                    <input type="radio" name="recipient_source" value="csv"
+                           x-model="recipientSource" class="sr-only peer">
+                    <div class="border-2 rounded-xl p-4 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 border-gray-200 hover:border-gray-300">
+                        <div class="text-xl mb-1">📄</div>
+                        <p class="text-sm font-semibold text-gray-800">Subir CSV</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Carga un archivo con teléfonos. Hasta 10.000 números.</p>
+                    </div>
+                    <span class="absolute top-2 right-2 hidden peer-checked:flex items-center justify-center">
+                        <span class="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                    </span>
+                </label>
+            </div>
+            @error('recipient_source')<p class="mb-3 text-xs text-red-600">{{ $message }}</p>@enderror
+
+            {{-- CAMPAIGN MODE --}}
+            <div x-show="recipientSource === 'campaign'" x-transition>
+                @if($campaigns->isEmpty())
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
+                        <strong>No hay campañas con clientes disponibles.</strong>
+                        Importa clientes desde <a href="{{ route('admin.campaigns.index') }}" class="underline">Campañas</a>.
+                    </div>
+                @else
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Campaña de origen</label>
+                        <select name="campaign_id"
+                                @change="selectCampaign($event.target.value)"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 @error('campaign_id') border-red-400 @enderror">
+                            <option value="">— Selecciona una campaña —</option>
+                            @foreach($campaigns as $campaign)
+                                <option value="{{ $campaign->id }}" {{ old('campaign_id') == $campaign->id ? 'selected' : '' }}>
+                                    {{ $campaign->name }} ({{ number_format($campaign->campaign_customers_count) }} clientes)
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('campaign_id')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
+                    <template x-if="selectedCampaign">
+                        <div class="bg-green-50 border border-green-100 rounded-lg p-3 flex items-center gap-3">
+                            <div class="text-2xl">👥</div>
+                            <div>
+                                <p class="text-sm font-semibold text-green-800" x-text="selectedCampaign.customer_count + ' clientes activos'"></p>
+                                <p class="text-xs text-green-600">Recibirán el mensaje WhatsApp como destinatarios</p>
+                            </div>
+                        </div>
+                    </template>
+                @endif
+            </div>
+
+            {{-- CSV MODE --}}
+            <div x-show="recipientSource === 'csv'" x-transition class="space-y-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-800 space-y-1">
+                    <p class="font-semibold">Formato del CSV</p>
+                    <ul class="list-disc list-inside space-y-0.5 text-blue-700">
+                        <li>Separador: <strong>coma</strong> (<code class="bg-blue-100 px-0.5 rounded">,</code>) o <strong>punto y coma</strong> (<code class="bg-blue-100 px-0.5 rounded">;</code>) — se detecta automáticamente</li>
+                        <li>Columnas: <code class="bg-blue-100 px-0.5 rounded">phone</code> (requerida), <code class="bg-blue-100 px-0.5 rounded">name</code> (opcional)</li>
+                        <li>Teléfonos colombianos de 10 dígitos se normalizan automáticamente (ej: <code class="bg-blue-100 px-0.5 rounded">3001234567</code> → <code class="bg-blue-100 px-0.5 rounded">573001234567</code>)</li>
+                        <li>Duplicados y filas vacías se eliminan automáticamente</li>
+                        <li>Máximo 10.000 números por archivo</li>
+                    </ul>
+                    <div class="mt-2 pt-2 border-t border-blue-200">
+                        <p class="font-semibold text-blue-800 mb-1">Ejemplos de formato válido:</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <p class="text-blue-600 mb-0.5">Con encabezado:</p>
+                                <code class="block bg-white border border-blue-100 rounded p-1.5 text-[10px] whitespace-pre">phone,name
+3001234567,Juan García
+3009876543,María López</code>
+                            </div>
+                            <div>
+                                <p class="text-blue-600 mb-0.5">Sin encabezado:</p>
+                                <code class="block bg-white border border-blue-100 rounded p-1.5 text-[10px] whitespace-pre">3001234567,Juan García
+3009876543,María López
+3112223344</code>
+                            </div>
                         </div>
                     </div>
-                </template>
-            @endif
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Archivo CSV <span class="text-red-500">*</span></label>
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-blue-300 transition-colors"
+                         @dragover.prevent="$el.classList.add('border-blue-400','bg-blue-50')"
+                         @dragleave.prevent="$el.classList.remove('border-blue-400','bg-blue-50')"
+                         @drop.prevent="handleCsvDrop($event)">
+                        <input type="file" name="csv_file" id="csv_file" accept=".csv,.txt"
+                               class="hidden"
+                               @change="handleCsvSelect($event)">
+                        <template x-if="!csvFileName">
+                            <div>
+                                <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <p class="text-sm text-gray-500 mb-2">Arrastra tu CSV aquí o</p>
+                                <button type="button" @click="$refs.csvInput.click()"
+                                        class="text-sm bg-white border border-gray-200 hover:border-blue-400 text-gray-700 px-4 py-1.5 rounded-lg transition-colors">
+                                    Seleccionar archivo
+                                </button>
+                            </div>
+                        </template>
+                        <template x-if="csvFileName">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="text-sm font-medium text-gray-800" x-text="csvFileName"></p>
+                                        <p class="text-xs text-gray-400" x-text="csvFileSize"></p>
+                                    </div>
+                                </div>
+                                <button type="button" @click="clearCsv()"
+                                        class="text-red-400 hover:text-red-600 text-sm px-2 py-1 rounded">
+                                    Quitar
+                                </button>
+                            </div>
+                        </template>
+                        <input type="file" x-ref="csvInput" name="csv_file" accept=".csv,.txt"
+                               class="hidden" @change="handleCsvSelect($event)">
+                    </div>
+                    @error('csv_file')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+            </div>
         </div>
 
         {{-- 3: Lote de cupones --}}
@@ -296,6 +411,7 @@
 function waCreate(campaignData) {
     return {
         campaignData,
+        recipientSource: @json(old('recipient_source', 'campaign')),
         selectedCampaign: null,
         selectedBatch: null,
         selectedBatchId: @json(old('coupon_batch_id', '')),
@@ -307,6 +423,8 @@ function waCreate(campaignData) {
                 ? collect(old('template_fields'))->map(fn($v, $k) => ['key' => $k, 'value' => $v])->values()
                 : []
         ),
+        csvFileName: null,
+        csvFileSize: null,
 
         init() {
             const oldId = @json(old('campaign_id', ''));
@@ -338,6 +456,36 @@ function waCreate(campaignData) {
         selectBatch(id) {
             this.selectedBatch = !id || !this.selectedCampaign ? null
                 : this.selectedCampaign.batches.find(b => String(b.id) === String(id)) || null;
+        },
+
+        handleCsvSelect(e) {
+            const f = e.target.files[0];
+            if (f) { this.csvFileName = f.name; this.csvFileSize = this.formatBytes(f.size); }
+        },
+
+        handleCsvDrop(e) {
+            const f = e.dataTransfer.files[0];
+            if (!f) return;
+            this.$el.classList.remove('border-blue-400','bg-blue-50');
+            if (!f.name.match(/\.(csv|txt)$/i)) { alert('Solo se aceptan archivos .csv o .txt'); return; }
+            // Assign to hidden input via DataTransfer
+            const dt = new DataTransfer();
+            dt.items.add(f);
+            this.$refs.csvInput.files = dt.files;
+            this.csvFileName = f.name;
+            this.csvFileSize = this.formatBytes(f.size);
+        },
+
+        clearCsv() {
+            this.$refs.csvInput.value = '';
+            this.csvFileName = null;
+            this.csvFileSize = null;
+        },
+
+        formatBytes(b) {
+            if (b < 1024) return b + ' B';
+            if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+            return (b/1048576).toFixed(1) + ' MB';
         },
 
         insertVar(v) {

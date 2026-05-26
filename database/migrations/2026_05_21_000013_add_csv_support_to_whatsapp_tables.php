@@ -1,0 +1,27 @@
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::table('whatsapp_campaigns', function (Blueprint $table) {
+            $table->enum('recipient_source', ['campaign', 'csv'])->default('campaign')->after('campaign_id');
+        });
+
+        Schema::table('whatsapp_recipients', function (Blueprint $table) {
+            $table->string('name', 150)->nullable()->after('phone');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('whatsapp_campaigns', function (Blueprint $table) {
+            $table->dropColumn('recipient_source');
+        });
+        Schema::table('whatsapp_recipients', function (Blueprint $table) {
+            $table->dropColumn('name');
+        });
+    }
+};

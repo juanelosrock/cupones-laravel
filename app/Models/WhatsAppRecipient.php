@@ -8,7 +8,7 @@ class WhatsAppRecipient extends Model
     public $timestamps  = false;
     protected $table    = 'whatsapp_recipients';
     protected $fillable = [
-        'whatsapp_campaign_id', 'customer_id', 'phone',
+        'whatsapp_campaign_id', 'customer_id', 'phone', 'name',
         'assigned_coupon_code', 'status', 'message_sent',
         'sent_at', 'error_message', 'provider_response', 'created_at',
     ];
