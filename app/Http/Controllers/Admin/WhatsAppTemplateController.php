@@ -79,30 +79,32 @@ class WhatsAppTemplateController extends Controller
 
     private function buildComponents(array $data): array
     {
+        // Zenvia POST /v2/templates expects components as a JSON *object* keyed by
+        // lowercase type name, not an array — despite GET returning an array.
         $components = [];
 
         // HEADER
         if (!empty($data['header_type'])) {
-            $header = ['type' => 'HEADER', 'format' => $data['header_type']];
+            $header = ['format' => $data['header_type']];
             if ($data['header_type'] === 'TEXT') {
                 $header['text'] = $data['header_text'] ?? '';
             } elseif (!empty($data['header_media_url'])) {
                 $header['example'] = ['header_handle' => [$data['header_media_url']]];
             }
-            $components[] = $header;
+            $components['header'] = $header;
         }
 
         // BODY
-        $body = ['type' => 'BODY', 'text' => $data['body']];
+        $body = ['text' => $data['body']];
         $examples = array_values(array_filter($data['body_examples'] ?? [], fn($v) => $v !== '' && $v !== null));
         if (!empty($examples)) {
             $body['example'] = ['body_text' => [$examples]];
         }
-        $components[] = $body;
+        $components['body'] = $body;
 
         // FOOTER
         if (!empty($data['footer'])) {
-            $components[] = ['type' => 'FOOTER', 'text' => $data['footer']];
+            $components['footer'] = ['text' => $data['footer']];
         }
 
         // BUTTONS
@@ -119,9 +121,7 @@ class WhatsAppTemplateController extends Controller
                 }
                 $built[] = $b;
             }
-            if (!empty($built)) {
-                $components[] = ['type' => 'BUTTONS', 'buttons' => $built];
-            }
+            $components['buttons'] = $built;
         }
 
         return $components;
